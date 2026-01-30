@@ -2887,20 +2887,20 @@ def create_driver():
     options = Options()
 
     # Mandatory for GitHub Actions
-    # options.add_argument("--headless=new")
+    options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
     options.add_argument("--window-size=1920,1080")
 
     # Optional but good
-    # options.add_argument(
-    #     "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-    #     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    # )
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
 
     # Important for Ubuntu runner
-    # options.binary_location = "/usr/bin/chromium"
+    options.binary_location = "/usr/bin/chromium"
 
     service = Service(ChromeDriverManager().install())
 
@@ -2957,18 +2957,16 @@ def scrape_college_info(driver,URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
         except:
-            print("⚠️ Cover image not found")
+            pass 
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract videos and photos count
         try:
@@ -2986,12 +2984,12 @@ def scrape_college_info(driver,URLS):
                     if photos_match:
                         college_info["photos_count"] = int(photos_match.group(1))
         except:
-            print("⚠️ Videos/Photos count not found")
+            pass
         
         # Rest of your existing header extraction code...
         
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        pass
     # ================= COLLEGE NAME =================
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "h1")))
     data["college_info"]["college_name"] = driver.find_element(By.TAG_NAME, "h1").text.strip()
@@ -3193,14 +3191,10 @@ def scrape_college_info(driver,URLS):
         data["college_info"]["highlights"]["table"] = formatted_table
 
     except Exception as e:
-        print(f"Highlights error: {e}")
         data["college_info"]["highlights"]["summary"] = "Summary not available"
         data["college_info"]["highlights"]["table"] = []
 
-    # Print extracted data for debugging
-    print("\n=== EXTRACTED HIGHLIGHTS ===")
-    print(f"Summary length: {len(data["college_info"]['highlights']['summary'])} chars")
-    print(f"Table entries: {len(data["college_info"]['highlights']['table'])}")
+
     for item in data["college_info"]["highlights"]["table"]:
         print(f"  - {item['particular']}: {item['details'][:50]}...")
 
@@ -3332,7 +3326,7 @@ def scrape_college_info(driver,URLS):
         pass
     # ================= PLACEMENTS SECTION - FIX FOR DYNAMIC CONTENT =================
     try:
-        print("Extracting placements data with dynamic content handling...")
+        
         
         # Wait for placements section
         placements_section = wait.until(
@@ -3392,7 +3386,7 @@ def scrape_college_info(driver,URLS):
                 data["placements"]["overview"] = "Overview not available"
                 
         except Exception as e:
-            print(f"Overview error: {e}")
+            
             data["placements"]["overview"] = "Overview not available"
         
         # 🔹 2. COURSE-WISE SALARIES - Use JavaScript to extract table data
@@ -3425,10 +3419,10 @@ def scrape_college_info(driver,URLS):
             """)
             
             data["placements"]["course_wise_data"] = course_data
-            print(f"✓ Found {len(course_data)} courses")
+           
             
         except Exception as e:
-            print(f"Course data error: {e}")
+        
             data["placements"]["course_wise_data"] = []
         
         # 🔹 3. TOP RECRUITERS - Extract from carousel
@@ -3470,10 +3464,10 @@ def scrape_college_info(driver,URLS):
             """)
             
             data["placements"]["top_recruiters"] = recruiters
-            print(f"✓ Found {len(recruiters)} recruiters")
+            
             
         except Exception as e:
-            print(f"Recruiters error: {e}")
+          
             data["placements"]["top_recruiters"] = []
         
         # 🔹 4. STUDENT INSIGHTS
@@ -3500,10 +3494,10 @@ def scrape_college_info(driver,URLS):
             """)
             
             data["placements"]["student_insights"] = insights
-            print(f"✓ Found {len(insights)} insights")
+           
             
         except Exception as e:
-            print(f"Insights error: {e}")
+        
             data["placements"]["student_insights"] = []
         
         # 🔹 5. FAQS - Extract from FAQ section
@@ -3552,10 +3546,10 @@ def scrape_college_info(driver,URLS):
             """)
             
             data["placements"]["faqs"] = faqs
-            print(f"✓ Found {len(faqs)} FAQs")
+           
             
         except Exception as e:
-            print(f"FAQs error: {e}")
+          
             data["placements"]["faqs"] = []
         
         # 🔹 6. KEY STATISTICS
@@ -3582,60 +3576,18 @@ def scrape_college_info(driver,URLS):
                     stats[key] = match.group(1)
             
             data["placements"]["key_statistics"] = stats
-            print(f"✓ Found {len(stats)} statistics")
+            
             
         except Exception as e:
-            print(f"Statistics error: {e}")
+       
             data["placements"]["key_statistics"] = {}
         
-        print("✅ Placements data extracted successfully!")
+     
         
     except Exception as e:
-        print(f"Placements extraction failed: {e}")
-        import traceback
-        traceback.print_exc()
+        pass
 
-    # Print summary
-    print("\n" + "="*60)
-    print("FINAL PLACEMENTS DATA:")
-    print("="*60)
 
-    # Print courses
-    if data["placements"]["course_wise_data"]:
-        print("\nCourse-wise Median Salaries:")
-        for course in data["placements"]["course_wise_data"]:
-            print(f"  • {course.get('name', 'N/A')}: {course.get('median_salary', 'N/A')}")
-    else:
-        print("\n⚠ No course data found")
-
-    # Print recruiters
-    if data["placements"]["top_recruiters"]:
-        print(f"\nTop Recruiters ({len(data['placements']['top_recruiters'])}):")
-        print(f"  Sample: {', '.join(data['placements']['top_recruiters'][:5])}")
-    else:
-        print("\n⚠ No recruiters found")
-
-    # Print insights
-    if data["placements"]["student_insights"]:
-        print(f"\nStudent Insights ({len(data['placements']['student_insights'])}):")
-        for insight in data["placements"]["student_insights"][:2]:
-            print(f"  • {insight.get('category', 'N/A')}: {insight.get('feedback', 'N/A')}")
-    else:
-        print("\n⚠ No insights found")
-
-    # Print FAQs
-    if data["placements"]["faqs"]:
-        print(f"\nFAQs ({len(data['placements']['faqs'])}):")
-        for faq in data["placements"]["faqs"][:2]:
-            print(f"  • Q: {faq.get('question', 'N/A')[:50]}...")
-    else:
-        print("\n⚠ No FAQs found")
-
-    # Print statistics
-    if data["placements"]["key_statistics"]:
-        print(f"\nKey Statistics:")
-        for key, value in data["placements"]["key_statistics"].items():
-            print(f"  • {key}: {value}")
     # ================= FEES & ELIGIBILITY SECTION =================
     try:
         print("Extracting fees and eligibility data...")
@@ -3669,10 +3621,10 @@ def scrape_college_info(driver,URLS):
                     overview_texts.append(text)
             
             data["fees_and_eligibility"]["overview"] = "\n\n".join(overview_texts[:3])
-            print(f"✓ Overview extracted: {len(overview_texts)} paragraphs")
+            
             
         except Exception as e:
-            print(f"Overview error: {e}")
+           
             data["fees_and_eligibility"]["overview"] = "Overview not available"
         
         # 🔹 2. COURSES TABLE DATA
@@ -3752,14 +3704,14 @@ def scrape_college_info(driver,URLS):
                         courses_data.append(course_info)
                         
                 except Exception as e:
-                    print(f"Error parsing row: {e}")
+                    
                     continue
             
             data["fees_and_eligibility"]["courses_table"] = courses_data
-            print(f"✓ Courses table extracted: {len(courses_data)} courses")
+           
             
         except Exception as e:
-            print(f"Courses table error: {e}")
+           
             data["fees_and_eligibility"]["courses_table"] = []
         
         # 🔹 3. FAQS - FIXED VERSION
@@ -3833,10 +3785,9 @@ def scrape_college_info(driver,URLS):
             
             if faqs_data:
                 data["fees_and_eligibility"]["faqs"] = faqs_data
-                print(f"✓ FAQs extracted via JS: {len(faqs_data)} questions")
+                
             else:
-                # Fallback: Try with Python if JS fails
-                print("JS extraction failed, trying Python fallback...")
+              
                 try:
                     faq_section = fees_section.find_element(By.CSS_SELECTOR, ".sectional-faqs")
                     
@@ -3880,14 +3831,14 @@ def scrape_college_info(driver,URLS):
                         })
                     
                     data["fees_and_eligibility"]["faqs"] = faqs_list
-                    print(f"✓ FAQs extracted via Python: {len(faqs_list)} questions")
+                   
                     
                 except Exception as e:
-                    print(f"Python FAQ extraction also failed: {e}")
+                   
                     data["fees_and_eligibility"]["faqs"] = []
             
         except Exception as e:
-            print(f"FAQs error: {e}")
+           
             data["fees_and_eligibility"]["faqs"] = []
         # 🔹 4. KEY STATISTICS (from overview)
         try:
@@ -3918,16 +3869,16 @@ def scrape_college_info(driver,URLS):
                 stats["accepted_exams"] = exams_match.group(1).strip()
             
             data["fees_and_eligibility"]["key_statistics"] = stats
-            print(f"✓ Statistics extracted: {len(stats)} items")
+           
             
         except Exception as e:
-            print(f"Statistics error: {e}")
+          
             data["fees_and_eligibility"]["key_statistics"] = {}
         
-        print("✅ Fees & eligibility data extracted successfully!")
+       
         
     except Exception as e:
-        print(f"Fees section error: {e}")
+       
         import traceback
         traceback.print_exc()
         data["fees_and_eligibility"] = {
@@ -3937,37 +3888,9 @@ def scrape_college_info(driver,URLS):
             "key_statistics": {}
         }
 
-    # Print summary
-    print("\n" + "="*60)
-    print("FEES & ELIGIBILITY DATA SUMMARY:")
-    print("="*60)
-
-    # Print courses
-    if data["fees_and_eligibility"]["courses_table"]:
-        print("\nCourses & Fees:")
-        for course in data["fees_and_eligibility"]["courses_table"]:
-            print(f"  • {course.get('course_name', 'N/A')} ({course.get('course_count', 'N/A')} courses): {course.get('tuition_fees', 'N/A')}")
-    else:
-        print("\n⚠ No course data found")
-
-    # Print FAQs
-    if data["fees_and_eligibility"]["faqs"]:
-        print(f"\nFAQs ({len(data['fees_and_eligibility']['faqs'])}):")
-        for faq in data["fees_and_eligibility"]["faqs"][:3]:
-            print(f"  • Q: {faq.get('question', 'N/A')[:60]}...")
-    else:
-        print("\n⚠ No FAQs found")
-
-    # Print statistics
-    if data["fees_and_eligibility"]["key_statistics"]:
-        print(f"\nKey Statistics:")
-        for key, value in data["fees_and_eligibility"]["key_statistics"].items():
-            print(f"  • {key}: {value}")
     # ================= STUDENT REVIEWS SECTION =================
     try:
-        print("Extracting student reviews data...")
-        
-        # Wait for reviews section container
+      
         reviews_container = wait.until(
             EC.presence_of_element_located((By.CSS_SELECTOR, ".a2eb03"))
         )
@@ -3989,9 +3912,7 @@ def scrape_college_info(driver,URLS):
         try:
             # Find all review cards
             review_cards = reviews_container.find_elements(By.CSS_SELECTOR, ".paper-card[id^='review_']")
-            
-            print(f"✓ Found {len(review_cards)} review cards")
-            
+        
             reviews_data = []
             
             for card in review_cards:
@@ -4131,16 +4052,15 @@ def scrape_college_info(driver,URLS):
                     reviews_data.append(review_data)
                     
                 except Exception as e:
-                    print(f"Error parsing review card: {e}")
+                    print(f"Error parsing review card: ")
                     continue
             
             data["student_reviews"]["reviews_list"] = reviews_data
             data["student_reviews"]["total_reviews_count"] = len(reviews_data)
             
-            print(f"✓ Successfully extracted {len(reviews_data)} reviews")
             
         except Exception as e:
-            print(f"Error extracting reviews list: {e}")
+            
             data["student_reviews"]["reviews_list"] = []
         
         # 🔹 2. VIDEO REVIEWS (Mini Clips)
@@ -4187,14 +4107,14 @@ def scrape_college_info(driver,URLS):
                     })
                     
                 except Exception as e:
-                    print(f"Error parsing video item: {e}")
+                    
                     continue
             
             data["student_reviews"]["video_reviews"] = video_reviews
-            print(f"✓ Found {len(video_reviews)} video reviews")
+            
             
         except Exception as e:
-            print(f"Error extracting video reviews: {e}")
+        
             data["student_reviews"]["video_reviews"] = []
         
         # 🔹 3. TOTAL REVIEWS COUNT FROM "VIEW ALL" BUTTON
@@ -4209,10 +4129,9 @@ def scrape_college_info(driver,URLS):
             if count_match:
                 total_reviews = int(count_match.group(1))
                 data["student_reviews"]["total_reviews_count"] = total_reviews
-                print(f"✓ Total reviews count: {total_reviews}")
+          
                 
         except Exception as e:
-            print(f"Error extracting total reviews count: {e}")
             # Use count from extracted reviews if available
             if data["student_reviews"]["total_reviews_count"] == 0:
                 data["student_reviews"]["total_reviews_count"] = len(data["student_reviews"]["reviews_list"])
@@ -4272,13 +4191,13 @@ def scrape_college_info(driver,URLS):
                 print(f"✓ Calculated average rating: {data['student_reviews']['average_rating']}")
                 
         except Exception as e:
-            print(f"Error calculating summary: {e}")
+            
             data["student_reviews"]["review_summary"] = {}
         
-        print("✅ Student reviews data extracted successfully!")
+      
         
     except Exception as e:
-        print(f"Student reviews section error: {e}")
+        
         import traceback
         traceback.print_exc()
         
@@ -4290,39 +4209,7 @@ def scrape_college_info(driver,URLS):
             "review_summary": {}
         }
 
-    # Print detailed summary
-    print("\n" + "="*70)
-    print("STUDENT REVIEWS - EXTRACTION SUMMARY:")
-    print("="*70)
 
-    print(f"\n📊 REVIEW STATISTICS:")
-    print(f"  • Total Reviews: {data['student_reviews']['total_reviews_count']}")
-    print(f"  • Extracted Reviews: {len(data['student_reviews']['reviews_list'])}")
-    print(f"  • Average Rating: {data['student_reviews']['average_rating']}/5")
-
-    if data["student_reviews"]["review_summary"]:
-        print(f"  • Verified Reviews: {data['student_reviews']['review_summary'].get('verified_reviews_count', 0)}")
-        print(f"  • Reviews with Photos: {data['student_reviews']['review_summary'].get('reviews_with_photos', 0)}")
-
-    print(f"\n🎬 VIDEO REVIEWS: {len(data['student_reviews']['video_reviews'])} found")
-
-    # Display first few reviews as sample
-    if data["student_reviews"]["reviews_list"]:
-        print(f"\n📝 SAMPLE REVIEWS (first 3):")
-        for i, review in enumerate(data["student_reviews"]["reviews_list"][:3], 1):
-            print(f"\n  {i}. {review.get('student_name', 'Anonymous')} ({review.get('batch_info', 'N/A')})")
-            print(f"     Rating: {review.get('overall_rating', 'N/A')}/5")
-            print(f"     Title: {review.get('review_title', 'N/A')[:50]}...")
-            
-            # Show first category content
-            content = review.get('review_content', {})
-            if content:
-                first_key = list(content.keys())[0]
-                first_value = content[first_key]
-                preview = first_value[:80] + "..." if len(first_value) > 80 else first_value
-                print(f"     {first_key}: {preview}")
-
-    print("\n" + "="*70)
     return data 
 def clean_text(text):
     remove_words = [
@@ -4369,18 +4256,18 @@ def scrape_courses(driver, URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
+           
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
+            pass
         except:
-            print("⚠️ Logo not found")
+           pass
         
         # Extract videos and photos count
         try:
@@ -4398,19 +4285,19 @@ def scrape_courses(driver, URLS):
                     if photos_match:
                         college_info["photos_count"] = int(photos_match.group(1))
         except:
-            print("⚠️ Videos/Photos count not found")
+            pass
         
         # Rest of your existing header extraction code...
         
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
     
     # ---------- COLLEGE NAME ----------
     try:
         name_elem = driver.find_element(By.CSS_SELECTOR, ".cc5e8d")
         college_info["college_name"] = name_elem.text.strip()
     except Exception as e:
-        print(f"College name error: {e}")
+        pass
     
     # ---------- LOCATION ----------
     try:
@@ -4423,7 +4310,7 @@ def scrape_courses(driver, URLS):
         else:
             college_info["location"] = location_text
     except Exception as e:
-        print(f"Location error: {e}")
+        print("Location error:")
     
     # ---------- RATING AND REVIEWS ----------
     try:
@@ -4434,7 +4321,7 @@ def scrape_courses(driver, URLS):
             rating_parts = rating_text.split("/")
             college_info["rating"] = rating_parts[0].strip()
     except Exception as e:
-        print(f"Rating error: {e}")
+        print("Rating error:")
     
     try:
         # Reviews count
@@ -4444,7 +4331,7 @@ def scrape_courses(driver, URLS):
         if reviews_match:
             college_info["reviews_count"] = int(reviews_match.group(1))
     except Exception as e:
-        print(f"Reviews error: {e}")
+        print("Reviews error")
     
     # ---------- Q&A COUNT ----------
     try:
@@ -4458,7 +4345,7 @@ def scrape_courses(driver, URLS):
             else:
                 college_info["qa_count"] = int(qa_value)
     except Exception as e:
-        print(f"Q&A error: {e}")
+        print("Q&A error:")
     
     # ---------- INSTITUTE TYPE AND ESTABLISHED YEAR ----------
     try:
@@ -4472,7 +4359,7 @@ def scrape_courses(driver, URLS):
                 if year_match:
                     college_info["established_year"] = int(year_match.group())
     except Exception as e:
-        print(f"Institute info error: {e}")
+        print("Institute info error")
     
     # ---------- FEE STRUCTURE HEADING AND OVERVIEW ----------
     fee_heading = ""
@@ -4497,11 +4384,10 @@ def scrape_courses(driver, URLS):
                     fee_overview = text
                     break
         
-        print(f"✓ Fee heading: {fee_heading}")
-        print(f"✓ Fee overview: {len(fee_overview)} characters")
+     
         
     except Exception as e:
-        print(f"Fee heading/overview error: {e}")
+        print("Fee heading/overview error:")
     
     # ---------- FEE STRUCTURE TABLE DATA (IMPROVED WITH CLEANING) ----------
     fee_structure = []
@@ -4514,13 +4400,13 @@ def scrape_courses(driver, URLS):
             try:
                 section_text = fee_section.text.lower()
                 if "fee" in section_text or "tuition" in section_text:
-                    print("Found fee structure section")
+                  
                     
                     # Extract fee structure table
                     try:
                         fee_tables = fee_section.find_elements(By.TAG_NAME, "table")
-                        for table_idx, table in enumerate(fee_tables):
-                            print(f"Processing table {table_idx + 1}")
+                        for table in enumerate(fee_tables):
+                            
                             
                             # Get all rows
                             rows = table.find_elements(By.TAG_NAME, "tr")
@@ -4551,7 +4437,7 @@ def scrape_courses(driver, URLS):
                                     # Skip first row as it's now headers
                                     rows = rows[1:]
                             
-                            print(f"Table headers: {headers}")
+                         
                             
                             # Extract table rows
                             for row_idx, row in enumerate(rows):
@@ -4637,19 +4523,19 @@ def scrape_courses(driver, URLS):
                                                 cleaned_fee_item[key] = value
                                         
                                         fee_structure.append(cleaned_fee_item)
-                                        print(f"  Added clean fee item {row_idx + 1}")
+                                       
                                     
                                 except Exception as e:
-                                    print(f"Error processing row {row_idx}: {e}")
+                                   
                                     continue
                     
                     except Exception as e:
-                        print(f"Error extracting fee table: {e}")
+                        print("Error extracting fee table:")
                     
                     break  # Stop after first valid fee section
                     
             except Exception as e:
-                print(f"Error processing fee section: {e}")
+                print("Error processing fee section:")
                 continue
         
         # Clean empty items from fee_structure
@@ -4682,10 +4568,10 @@ def scrape_courses(driver, URLS):
                         if old_key in item:
                             item[new_key] = item.pop(old_key)
         
-        print(f"✓ Extracted {len(fee_structure)} clean fee structure items")
+
         
     except Exception as e:
-        print(f"Fee structure error: {e}")
+        print("Fee structure error:")
     
     # ---------- COURSES OVERVIEW TEXT ----------
     overview_text = ""
@@ -4717,9 +4603,9 @@ def scrape_courses(driver, URLS):
             overview_text = re.sub(r'\s*\n\s*', ' ', overview_text)
             overview_text = re.sub(r'\s+', ' ', overview_text).strip()
         
-        print(f"✓ Courses overview extracted: {len(overview_text)} characters")
+        
     except Exception as e:
-        print(f"Courses overview error: {e}")
+        print("Courses overview error")
     
     # ---------- COURSES TABLE DATA ----------
     courses = []
@@ -4823,13 +4709,13 @@ def scrape_courses(driver, URLS):
                     courses.append(course_obj)
                     
             except Exception as e:
-                print(f"Error parsing course row: {e}")
+            
                 continue
         
-        print(f"✓ Extracted {len(courses)} courses from table")
+ 
         
     except Exception as e:
-        print(f"Error extracting courses table: {e}")
+        print("Error extracting courses table:")
         courses = []
     
     # ---------- FAQS DATA - IMPROVED CLEANING ----------
@@ -4914,10 +4800,10 @@ def scrape_courses(driver, URLS):
         
         if faqs_data:
             faqs = faqs_data
-            print(f"✓ Extracted {len(faqs)} FAQs via JavaScript")
+           
         else:
             # Fallback to Python method
-            print("JavaScript extraction failed, trying Python fallback...")
+
             try:
                 # Get all question elements
                 question_elements = faq_section.find_elements(By.CSS_SELECTOR, ".ea1844")
@@ -4977,13 +4863,13 @@ def scrape_courses(driver, URLS):
                             })
                             
                     except Exception as e:
-                        print(f"Error parsing FAQ {i}: {e}")
+                
                         continue
                 
-                print(f"✓ Extracted {len(faqs)} FAQs via Python")
+           
                 
             except Exception as e:
-                print(f"Python FAQ extraction also failed: {e}")
+                print("Python FAQ extraction also failed:")
                 faqs = []
         
         # Additional cleaning of FAQ answers
@@ -4992,7 +4878,7 @@ def scrape_courses(driver, URLS):
             faq["answer"] = re.sub(r'\s+', ' ', faq["answer"]).strip()
         
     except Exception as e:
-        print(f"FAQ section error: {e}")
+        print("FAQ section error:")
         faqs = []
     
     # Create final response structure with organized fee structure
@@ -5007,51 +4893,6 @@ def scrape_courses(driver, URLS):
         },
         "faqs": faqs
     }
-    
-    # Print summary with fee structure info
-    print("\n" + "="*60)
-    print("COURSES SCRAPING SUMMARY:")
-    print("="*60)
-    print(f"College: {college_info.get('college_name', 'N/A')}")
-    print(f"Location: {college_info.get('location', 'N/A')}, {college_info.get('city', 'N/A')}")
-    print(f"Rating: {college_info.get('rating', 'N/A')}/5")
-    print(f"Reviews: {college_info.get('reviews_count', 'N/A')}")
-    print(f"Q&A: {college_info.get('qa_count', 'N/A')}")
-    print(f"Institute Type: {college_info.get('institute_type', 'N/A')}")
-    print(f"Established: {college_info.get('established_year', 'N/A')}")
-    print(f"Overview: {len(overview_text)} characters")
-    print(f"Courses Extracted: {len(courses)}")
-    print(f"Fee Structure Heading: {fee_heading}")
-    print(f"Fee Overview: {len(fee_overview)} characters")
-    print(f"Fee Structure Items: {len(fee_structure)}")
-    print(f"FAQs Extracted: {len(faqs)}")
-    
-    # Display sample course data
-    if courses:
-        print("\nSAMPLE COURSES:")
-        for i, course in enumerate(courses[:3], 1):
-            print(f"  {i}. {course.get('course_name', 'N/A')}")
-            print(f"     Fees: {course.get('fees', 'N/A')}")
-            if isinstance(course.get('eligibility'), dict):
-                if 'graduation_percentage' in course['eligibility']:
-                    print(f"     Graduation: {course['eligibility']['graduation_percentage']}")
-                if 'exams' in course['eligibility']:
-                    print(f"     Exams: {', '.join(course['eligibility']['exams'])}")
-            else:
-                print(f"     Eligibility: {course.get('eligibility', 'N/A')}")
-    
-    # Display sample fee structure data
-    if fee_structure:
-        print("\nSAMPLE FEE STRUCTURE:")
-        for i, fee_item in enumerate(fee_structure[:3], 1):
-            print(f"  {i}. {fee_item}")
-    
-    # Display sample FAQs
-    if faqs:
-        print("\nSAMPLE FAQS:")
-        for i, faq in enumerate(faqs[:2], 1):
-            print(f"  {i}. Q: {faq.get('question', 'N/A')[:60]}...")
-            print(f"     A: {faq.get('answer', 'N/A')[:80]}...")
 
     all_data = scrape_all_programs_and_courses(driver)
     faqs_section_data = scrape_faqs_section(driver)
@@ -5060,23 +4901,18 @@ def scrape_courses(driver, URLS):
     return result
 
 def scrape_all_programs_and_courses(driver):
-    """
-    Extract 'All Programs' and 'All Courses' data from the page
-    """
+
     all_programs_data = []
     all_courses_data = []
     
     # Wait for page to load completely
     time.sleep(2)
     
-    print("\n" + "="*60)
-    print("EXTRACTING ALL PROGRAMS AND COURSES")
-    print("="*60)
+
     
     # ---------- ALL PROGRAMS DATA ----------
     try:
-        print("Extracting 'All Programs' data...")
-        
+       
         # Find all program tuples
         program_tuples = driver.find_elements(By.CSS_SELECTOR, ".acp_base_course_tuple .d15c8a.fb6321.a25c93")
         
@@ -5125,7 +4961,7 @@ def scrape_all_programs_and_courses(driver):
                         }
                         
                 except Exception as e:
-                    print(f"Error extracting program details: {e}")
+                    print("Error extracting program details:")
                 
                 # Extract exams accepted
                 try:
@@ -5177,13 +5013,13 @@ def scrape_all_programs_and_courses(driver):
                 all_programs_data.append(program_data)
                 
             except Exception as e:
-                print(f"Error processing program tuple: {e}")
+                
                 continue
         
-        print(f"✓ Extracted {len(all_programs_data)} programs")
+       
         
     except Exception as e:
-        print(f"Error extracting all programs: {e}")
+        print("Error extracting all programs: ")
     
     # ---------- ALL COURSES DATA ----------
     try:
@@ -5235,7 +5071,7 @@ def scrape_all_programs_and_courses(driver):
                         course_data["degree_type"] = "Degree"
                         
                 except Exception as e:
-                    print(f"Error extracting course details: {e}")
+                    print("Error extracting course details:")
                 
                 # Extract seats offered
                 try:
@@ -5330,13 +5166,12 @@ def scrape_all_programs_and_courses(driver):
                 all_courses_data.append(course_data)
                 
             except Exception as e:
-                print(f"Error processing course tuple: {e}")
+                print("Error processing course tuple:")
                 continue
-        
-        print(f"✓ Extracted {len(all_courses_data)} courses")
+       
         
     except Exception as e:
-        print(f"Error extracting all courses: {e}")
+        print("Error extracting all courses:")
     
     # Create final result structure
     result = {
@@ -5344,44 +5179,13 @@ def scrape_all_programs_and_courses(driver):
         "all_courses": all_courses_data
     }
     
-    # Display summary
-    print("\n" + "="*60)
-    print("EXTRACTION SUMMARY")
-    print("="*60)
-    
-    if all_programs_data:
-        print("\nALL PROGRAMS SAMPLE:")
-        for i, program in enumerate(all_programs_data[:3], 1):
-            print(f"  {i}. {program.get('program_name', 'N/A')}")
-            print(f"     Courses: {program.get('course_count', 'N/A')}")
-            print(f"     Duration: {program.get('duration', 'N/A')}")
-            print(f"     Rating: {program.get('rating', 'N/A')}/5")
-            print(f"     Median Salary: {program.get('median_salary', 'N/A')}")
-            print(f"     Fees: {program.get('total_tuition_fees', 'N/A')}")
-    
-    if all_courses_data:
-        print("\nALL COURSES SAMPLE:")
-        for i, course in enumerate(all_courses_data[:3], 1):
-            print(f"  {i}. {course.get('course_name', 'N/A')}")
-            print(f"     Duration: {course.get('duration', 'N/A')}")
-            print(f"     Rating: {course.get('rating', 'N/A')}/5")
-            print(f"     Seats: {course.get('seats_offered', 'N/A')}")
-            print(f"     Median Salary: {course.get('median_salary', 'N/A')}")
-            print(f"     Fees: {course.get('total_tuition_fees', 'N/A')}")
-    
     return result
 
 def scrape_faqs_section(driver):
-    """
-    Extract FAQs from the 'Courses & Fees FAQs 2025' section
-    Wait for dynamic content to load
-    """
+
     faqs_data = []
     
-    print("\n" + "="*60)
-    print("EXTRACTING COURSES & FEES FAQS")
-    print("="*60)
-    
+ 
     try:
         # Wait for FAQ section to load
         wait = WebDriverWait(driver, 15)
@@ -5400,13 +5204,12 @@ def scrape_faqs_section(driver):
                 faq_section = wait.until(
                     EC.presence_of_element_located((selector_type, selector))
                 )
-                print(f"✓ FAQ section found using {selector_type}")
+             
                 break
             except:
                 continue
         
         if not faq_section:
-            print("✗ FAQ section not found with any selector")
             return {"faq_section": None}
         
         # Extract section heading
@@ -5430,8 +5233,7 @@ def scrape_faqs_section(driver):
         except:
             pass
         
-        print(f"FAQ Section: {section_heading}")
-        
+
         # Extract introduction text
         intro_text = ""
         try:
@@ -5454,12 +5256,10 @@ def scrape_faqs_section(driver):
         except:
             pass
         
-        # Wait for FAQ items to load (JavaScript content)
-        print("Waiting for FAQ items to load...")
+        
         time.sleep(3)  # Wait for JavaScript to load content
         
-        # Use JavaScript to extract FAQs (most reliable for dynamic content)
-        print("Extracting FAQs with JavaScript...")
+       
         js_faqs = driver.execute_script("""
             const faqs = [];
             
@@ -5731,9 +5531,9 @@ def scrape_faqs_section(driver):
         
         if js_faqs and len(js_faqs) > 0:
             faqs_data = js_faqs
-            print(f"✓ JavaScript extraction successful: {len(faqs_data)} FAQs")
+           
         else:
-            print("JavaScript extraction returned no FAQs, trying manual extraction...")
+         
             
             # Alternative: Try to find FAQ items using various patterns
             try:
@@ -5774,10 +5574,10 @@ def scrape_faqs_section(driver):
                             })
                 
             except Exception as e:
-                print(f"Manual extraction failed: {e}")
+                print("Manual extraction failed:")
         
     except Exception as e:
-        print(f"Error extracting FAQ section: {e}")
+        print("Error extracting FAQ section: ")
         import traceback
         traceback.print_exc()
     
@@ -5791,41 +5591,10 @@ def scrape_faqs_section(driver):
         }
     }
     
-    # Display sample data
-    if faqs_data:
-        print("\n" + "="*60)
-        print("FAQ SAMPLE DATA")
-        print("="*60)
-        print(f"Total FAQs extracted: {len(faqs_data)}")
-        
-        for i, faq in enumerate(faqs_data[:3], 1):
-            print(f"\nFAQ {i}: {faq.get('question', 'N/A')[:100]}...")
-            answer_text = faq.get('answer', {}).get('text', '')
-            if answer_text:
-                print(f"Answer: {answer_text[:150]}...")
-            else:
-                print("Answer: [Not found]")
-            
-            # Display metadata
-            answer_meta = faq.get('answer', {})
-            if answer_meta.get('has_table'):
-                tables = faq.get('tables', [])
-                print(f"  - Contains {len(tables)} table(s)")
-            
-            if answer_meta.get('has_image'):
-                print(f"  - Contains images")
-            
-            if answer_meta.get('has_list'):
-                print(f"  - Contains lists")
-    else:
-        print("\nNo FAQs were extracted")
-    
     return result
 # ---------------- FEES ----------------
 def scrape_fees(driver, URLS):
-    """
-    Scrape college information and fees data from the fees page
-    """
+   
     driver.get(URLS["fees"])
     wait = WebDriverWait(driver, 20)
     
@@ -5859,18 +5628,18 @@ def scrape_fees(driver, URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
+
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
+            
         except:
-            print("⚠️ Logo not found")
+           pass
         
         # Extract videos and photos count
         try:
@@ -5888,12 +5657,12 @@ def scrape_fees(driver, URLS):
                     if photos_match:
                         college_info["photos_count"] = int(photos_match.group(1))
         except:
-            print("⚠️ Videos/Photos count not found")
+            pass
         
         # Rest of your existing header extraction code...
         
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
     # ---------- COLLEGE HEADER ----------
     try:
         # Wait for page to load
@@ -5973,15 +5742,13 @@ def scrape_fees(driver, URLS):
                 pass
                 
         except Exception as e:
-            print(f"⚠️ Error extracting header info: {e}")
+            print("⚠️ Error extracting header info:")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
 
     # ---------- FEES OVERVIEW TABLE ----------
-    print("\n" + "="*60)
-    print("EXTRACTING FEES DATA")
-    print("="*60)
+
     
     try:
         # Look for fees overview table
@@ -6013,20 +5780,18 @@ def scrape_fees(driver, URLS):
                         "total_tuition_fees": fees_text
                     })
                     
-                    print(f"✓ Found: {course_name} - {fees_text}")
-                    
                 except Exception as e:
                     continue
                     
         except Exception as e:
-            print(f"⚠️ Error extracting overview table: {e}")
+            print("⚠️ Error extracting overview table: ")
 
         try:
             overview_desc = fees_section.find_element(By.CSS_SELECTOR, ".wikiContents .faq__according-wrapper p")
             overview_description = clean_text(overview_desc.text)
-            print(f"\nOverview: {overview_description[:200]}...")  # Terminal में print
+           
         except Exception as e:
-            print(f"⚠️ Could not extract overview description: {e}")
+            print("⚠️ Could not extract overview description: ")
             # Fallback: Try with BeautifulSoup
             try:
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
@@ -6041,12 +5806,10 @@ def scrape_fees(driver, URLS):
             except:
                 pass
     except Exception as e:
-        print(f"⚠️ Fees overview section not found: {e}")
+        print("⚠️ Fees overview section not found:")
 
     # ---------- DETAILED COURSE FEES ----------
-    print("\n" + "="*60)
-    print("EXTRACTING DETAILED COURSE FEES")
-    print("="*60)
+
     
     try:
         # Find all course fee sections
@@ -6066,8 +5829,6 @@ def scrape_fees(driver, URLS):
                 
                 if not course_name:
                     continue
-                
-                print(f"\nProcessing: {course_name}")
                 
                 # Extract course description
                 course_desc = ""
@@ -6201,27 +5962,23 @@ def scrape_fees(driver, URLS):
                     "course_faqs": course_faqs
                 })
                 
-                print(f"  ✓ Extracted {len(fee_components)} fee components")
-                print(f"  ✓ Extracted {len(course_faqs)} course FAQs")
+            
                 
             except Exception as e:
-                print(f"  ⚠️ Error processing course section: {e}")
+                print("  ⚠️ Error processing course section:")
                 continue
         
     except Exception as e:
-        print(f"⚠️ Error extracting detailed course fees: {e}")
+        print("⚠️ Error extracting detailed course fees:")
 
-    # ---------- FAQS SECTION ----------
-    print("\n" + "="*60)
-    print("EXTRACTING FAQS SECTION")
-    print("="*60)
+
     
     try:
         # Look for FAQ section in fees overview
         faq_container = driver.find_element(By.CSS_SELECTOR, ".a5ea4c.sectional-faqs")
         faq_items = faq_container.find_elements(By.CSS_SELECTOR, ".html-0.ea1844.listener")
         
-        print(f"Found {len(faq_items)} FAQ items in overview")
+        print("Found {len(faq_items)} FAQ items in overview")
         
         for i, faq_item in enumerate(faq_items, 1):
             try:
@@ -6281,14 +6038,14 @@ def scrape_fees(driver, URLS):
                         "section": "Fees Overview"
                     })
                     
-                    print(f"  FAQ {i}: {question[:80]}...")
+                  
                     
             except Exception as e:
-                print(f"  ⚠️ Error processing FAQ {i}: {e}")
+              
                 continue
                 
     except Exception as e:
-        print(f"⚠️ FAQ section not found: {e}")
+        print("⚠️ FAQ section not found: ")
 
     # ---------- FINAL RESULT ----------
     result = {
@@ -6305,30 +6062,6 @@ def scrape_fees(driver, URLS):
             "total_faqs": len(faqs_data) + sum(len(course.get("course_faqs", [])) for course in course_details)
         }
     }
-
-    # Print summary
-    print("\n" + "="*60)
-    print("EXTRACTION SUMMARY")
-    print("="*60)
-    print(f"College: {college_info.get('college_name', 'N/A')}")
-    print(f"Location: {college_info.get('location', 'N/A')}, {college_info.get('city', 'N/A')}")
-    print(f"Rating: {college_info.get('rating', 'N/A')}/5 ({college_info.get('reviews_count', 'N/A')} reviews)")
-    print(f"Q&A: {college_info.get('qa_count', 'N/A')} questions")
-    print(f"Fees Overview: {len(fees_data)} courses found")
-    print(f"Detailed Courses: {len(course_details)} courses with details")
-    print(f"Total FAQs: {result['faqs']['total_faqs']}")
-
-    # Display sample data
-    if fees_data:
-        print("\nSAMPLE FEES DATA:")
-        for fee in fees_data[:3]:
-            print(f"  • {fee['course']}: {fee['total_tuition_fees']}")
-
-    if faqs_data:
-        print("\nSAMPLE FAQS:")
-        for faq in faqs_data[:2]:
-            print(f"  Q: {faq['question'][:80]}...")
-            print(f"  A: {faq['answer'][:100]}...")
 
     return result
 
@@ -6366,18 +6099,17 @@ def scrape_review_summary(driver, URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
         except:
-            print("⚠️ Cover image not found")
+           pass
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
+    
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract videos and photos count
         try:
@@ -6400,7 +6132,7 @@ def scrape_review_summary(driver, URLS):
         # Rest of your existing header extraction code...
         
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
     # ---------- COLLEGE HEADER ----------
     try:
         # Wait for page to load
@@ -6480,18 +6212,14 @@ def scrape_review_summary(driver, URLS):
                 pass
                 
         except Exception as e:
-            print(f"⚠️ Error extracting header info: {e}")
+            print("⚠️ Error extracting header info:")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
     
     # ---------- REVIEW SUMMARY SECTION ----------
     try:
-        print("\n" + "="*50)
-        print("SCRAPING REVIEW SUMMARY SECTION...")
-        print("="*50)
-        
-        # Find review summary section
+      
         review_summary_section = driver.find_element(By.ID, "review_section_ratings_summary")
         
         # Extract overall rating
@@ -6501,9 +6229,9 @@ def scrape_review_summary(driver, URLS):
             rating_match = re.search(r'(\d+\.\d+)', rating_text)
             if rating_match:
                 college_info["review_summary"]["overall_rating"] = rating_match.group(1)
-                print(f"✓ Overall rating in review summary: {college_info['review_summary']['overall_rating']}")
+
         except Exception as e:
-            print(f"⚠️ Overall rating not found in review summary: {e}")
+            print("⚠️ Overall rating not found in review summary:")
         
         # Extract verified reviews count
         try:
@@ -6512,9 +6240,9 @@ def scrape_review_summary(driver, URLS):
             verified_match = re.search(r'(\d+)\s*Verified Reviews', verified_text)
             if verified_match:
                 college_info["review_summary"]["verified_reviews_count"] = int(verified_match.group(1))
-                print(f"✓ Verified reviews count: {college_info['review_summary']['verified_reviews_count']}")
+
         except Exception as e:
-            print(f"⚠️ Verified reviews count not found: {e}")
+            print("⚠️ Verified reviews count not found:")
         
         # Extract rating distribution
         try:
@@ -6538,9 +6266,9 @@ def scrape_review_summary(driver, URLS):
                 })
             
             college_info["review_summary"]["rating_distribution"] = rating_distribution
-            print(f"✓ Rating distribution found: {len(rating_distribution)} ranges")
+            
         except Exception as e:
-            print(f"⚠️ Rating distribution not found: {e}")
+            print("⚠️ Rating distribution not found:")
         
         # Extract category ratings
         try:
@@ -6557,18 +6285,15 @@ def scrape_review_summary(driver, URLS):
                 })
             
             college_info["review_summary"]["category_ratings"] = category_ratings
-            print(f"✓ Category ratings found: {len(category_ratings)} categories")
+      
         except Exception as e:
-            print(f"⚠️ Category ratings not found: {e}")
+            print("⚠️ Category ratings not found:")
             
     except Exception as e:
-        print(f"⚠️ Error scraping review summary section: {e}")
+        print("⚠️ Error scraping review summary section:")
     
     # ---------- REVIEW VIDEOS SECTION ----------
     try:
-        print("\n" + "="*50)
-        print("SCRAPING REVIEW VIDEOS SECTION...")
-        print("="*50)
         
         # Find review videos section
         review_videos_section = driver.find_element(By.ID, "review_section_mini_clips")
@@ -6576,9 +6301,9 @@ def scrape_review_summary(driver, URLS):
         # Extract video title
         try:
             video_title = review_videos_section.find_element(By.CSS_SELECTOR, ".e2ac30").text.strip()
-            print(f"✓ Video section title: {video_title}")
+            
         except Exception as e:
-            print(f"⚠️ Video section title not found: {e}")
+            print("⚠️ Video section title not found:")
         
         # Extract video items
         try:
@@ -6632,22 +6357,18 @@ def scrape_review_summary(driver, URLS):
                     college_info["review_videos"].append(video_data)
                     
         except Exception as e:
-            print(f"⚠️ Error extracting video items: {e}")
+            print("⚠️ Error extracting video items: ")
             
-        print(f"✓ Total videos extracted: {len(college_info['review_videos'])}")
+       
         
     except Exception as e:
-        print(f"⚠️ Error scraping review videos section: {e}")
+        print("⚠️ Error scraping review videos section:")
     
     # ---------- INDIVIDUAL REVIEWS ----------
     try:
-        print("\n" + "="*50)
-        print("SCRAPING INDIVIDUAL REVIEWS...")
-        print("="*50)
-        
-        # Find individual reviews (paper-card elements that are likely reviews)
+ 
         review_cards = driver.find_elements(By.CSS_SELECTOR, ".paper-card[id^='review_']")
-        print(f"✓ Found {len(review_cards)} individual review cards")
+        
         
         for review_card in review_cards[:5]:  # Limit to first 5 reviews for efficiency
             try:
@@ -6739,54 +6460,10 @@ def scrape_review_summary(driver, URLS):
                     college_info["individual_reviews"].append(review_data)
                     
             except Exception as e:
-                print(f"⚠️ Error processing individual review: {e}")
-        
-        print(f"✓ Total individual reviews extracted: {len(college_info['individual_reviews'])}")
-        
+                print("⚠️ Error processing individual review:")
+ 
     except Exception as e:
-        print(f"⚠️ Error scraping individual reviews: {e}")
-    
-    # Print summary of all extracted information
-    print("\n" + "="*60)
-    print("COMPLETE SCRAPING SUMMARY:")
-    print("="*60)
-    
-    print("\nBASIC INFORMATION:")
-    print("-" * 40)
-    basic_info = {k: v for k, v in college_info.items() if k not in ["review_summary", "review_videos", "individual_reviews"]}
-    for key, value in basic_info.items():
-        if value is not None and value != 0:
-            print(f"{key.replace('_', ' ').title()}: {value}")
-    
-    if college_info.get("review_summary"):
-        print("\nREVIEW SUMMARY:")
-        print("-" * 40)
-        summary = college_info["review_summary"]
-        if "overall_rating" in summary:
-            print(f"Overall Rating: {summary['overall_rating']}")
-        if "verified_reviews_count" in summary:
-            print(f"Verified Reviews: {summary['verified_reviews_count']}")
-        if "category_ratings" in summary:
-            print(f"Category Ratings: {len(summary['category_ratings'])} categories")
-        if "rating_distribution" in summary:
-            print(f"Rating Distribution: {len(summary['rating_distribution'])} ranges")
-    
-    if college_info.get("review_videos"):
-        print(f"\nREVIEW VIDEOS: {len(college_info['review_videos'])} videos")
-        print("-" * 40)
-        for i, video in enumerate(college_info["review_videos"][:3], 1):  # Show first 3
-            title = video.get("title", "No title")
-            yt_id = video.get("youtube_id", "No ID")
-            print(f"{i}. {title[:50]}... (YouTube ID: {yt_id})")
-    
-    if college_info.get("individual_reviews"):
-        print(f"\nINDIVIDUAL REVIEWS: {len(college_info['individual_reviews'])} reviews")
-        print("-" * 40)
-        for i, review in enumerate(college_info["individual_reviews"][:3], 1):  # Show first 3
-            user = review.get("user_name", "Unknown")
-            rating = review.get("overall_rating", "N/A")
-            title = review.get("title", "No title")[:30]
-            print(f"{i}. {user} ({rating}★) - {title}...")
+        print("⚠️ Error scraping individual reviews:")
     
     return college_info
 
@@ -6833,18 +6510,18 @@ def scrape_admission_overview(driver, URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
+           
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
+            
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract videos and photos count
         try:
@@ -6867,7 +6544,7 @@ def scrape_admission_overview(driver, URLS):
         # Rest of your existing header extraction code...
         
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
     # ---------- COLLEGE HEADER ----------
     try:
         # Wait for page to load
@@ -6947,22 +6624,21 @@ def scrape_admission_overview(driver, URLS):
                 pass
                 
         except Exception as e:
-            print(f"⚠️ Error extracting header info: {e}")
+            print("⚠️ Error extracting header info:")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section:")
     try:
-        print("Waiting for page to load...")
+       
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         time.sleep(3)
         
-        print("Scrolling to load dynamic content...")
+        
         for i in range(0, 2000, 300):
             driver.execute_script(f"window.scrollTo(0, {i});")
             time.sleep(0.5)
         
-        # ---------- ADMISSION OVERVIEW ----------
-        print("\n=== Extracting Admission Overview ===")
+     
         
         try:
             overview_section = wait.until(
@@ -6973,9 +6649,9 @@ def scrape_admission_overview(driver, URLS):
             try:
                 title_div = overview_section.find_element(By.CSS_SELECTOR, ".ae88c4")
                 college_info["admission_overview"]["title"] = title_div.text.strip()
-                print(f"✓ Admission Overview title: {college_info['admission_overview']['title']}")
+
             except:
-                print("⚠️ Admission Overview title not found")
+                pass
             
             # Extract description
             try:
@@ -6996,22 +6672,19 @@ def scrape_admission_overview(driver, URLS):
                         continue
                 
                 college_info["admission_overview"]["description"] = description_text.strip()
-                print(f"✓ Admission Overview description extracted: {len(description_text)} characters")
+
                 
             except Exception as e:
-                print(f"⚠️ Error extracting admission overview description: {e}")
+                print("⚠️ Error extracting admission overview description:")
             
             # Extract FAQs from admission overview
             try:
-                print("Extracting Admission Overview FAQs...")
-                
+               
                 faq_items = wait.until(
                     EC.presence_of_all_elements_located(
                         (By.CSS_SELECTOR, "#admission_section_admission_overview .html-0.ea1844.listener")
                     )
                 )
-                
-                print(f"Found {len(faq_items)} FAQ items in admission overview")
                 
                 for faq_item in faq_items:
                     try:
@@ -7053,19 +6726,15 @@ def scrape_admission_overview(driver, URLS):
                             })
                             
                     except Exception as e:
-                        print(f"Error processing FAQ item: {e}")
+                        
                         continue
                 
-                print(f"✓ Extracted {len(college_info['admission_overview']['faqs'])} FAQs from admission overview")
-                
+         
             except Exception as e:
-                print(f"⚠️ Error extracting admission overview FAQs: {e}")
+                print("⚠️ Error extracting admission overview FAQs:")
                 
         except Exception as e:
-            print(f"⚠️ Admission overview section not found: {e}")
-        
-        # ---------- ELIGIBILITY & SELECTION ----------
-        print("\n=== Extracting Eligibility & Selection ===")
+            print("⚠️ Admission overview section not found:")
         
         try:
             # Scroll to eligibility section
@@ -7080,9 +6749,9 @@ def scrape_admission_overview(driver, URLS):
             try:
                 title_div = eligibility_section.find_element(By.CSS_SELECTOR, ".ae88c4")
                 college_info["eligibility_selection"]["title"] = title_div.text.strip()
-                print(f"✓ Eligibility title: {college_info['eligibility_selection']['title']}")
+             
             except:
-                print("⚠️ Eligibility title not found")
+                pass
             
             # Extract description
             try:
@@ -7097,7 +6766,6 @@ def scrape_admission_overview(driver, URLS):
                         description_text = description_text.split("The table below")[0].strip()
                     
                     college_info["eligibility_selection"]["description"] = description_text
-                    print(f"✓ Eligibility description extracted: {len(description_text)} characters")
                     
                 except:
                     # Fallback
@@ -7110,10 +6778,7 @@ def scrape_admission_overview(driver, URLS):
                     college_info["eligibility_selection"]["description"] = description_text.strip()
                 
             except Exception as e:
-                print(f"⚠️ Error extracting eligibility description: {e}")
-            
-            # ---------- EXTRACT COURSES TABLE ----------
-            print("\n=== Extracting Courses Table ===")
+                print("⚠️ Error extracting eligibility description:")
             
             # SIMPLIFIED TABLE EXTRACTION
             try:
@@ -7182,12 +6847,9 @@ def scrape_admission_overview(driver, URLS):
                 
                 if courses_data and len(courses_data) > 0:
                     college_info["eligibility_selection"]["courses_table"] = courses_data
-                    print(f"✓ Extracted {len(courses_data)} courses:")
-                    for i, course in enumerate(courses_data, 1):
-                        print(f"  {i}. {course['course']}")
+                    
                 else:
-                    print("⚠️ No courses found in table")
-                    # Try manual extraction as fallback
+               
                     try:
                         tables = eligibility_section.find_elements(By.TAG_NAME, "table")
                         print(f"Found {len(tables)} tables total")
@@ -7223,16 +6885,14 @@ def scrape_admission_overview(driver, URLS):
                             except:
                                 continue
                                 
-                        print(f"Manual extraction found {len(college_info['eligibility_selection']['courses_table'])} courses")
-                        
+                    
                     except Exception as e:
-                        print(f"Manual extraction failed: {e}")
+                        print("Manual extraction failed: ")
                         
             except Exception as e:
-                print(f"⚠️ Error extracting courses table: {e}")
+                print("⚠️ Error extracting courses table: ")
             
-            # ---------- EXTRACT ELIGIBILITY FAQs ----------
-            print("\n=== Extracting Eligibility FAQs ===")
+      
             
             try:
                 # Scroll to FAQ area
@@ -7248,7 +6908,6 @@ def scrape_admission_overview(driver, URLS):
                 
                 # Get FAQ items
                 faq_items = faq_section.find_elements(By.CSS_SELECTOR, ".html-0.ea1844")
-                print(f"Found {len(faq_items)} FAQ items")
                 
                 # SIMPLIFIED FAQ EXTRACTION WITHOUT JAVASCRIPT ERRORS
                 for faq_item in faq_items:
@@ -7286,7 +6945,7 @@ def scrape_admission_overview(driver, URLS):
                                 answer_text = answer_text.split("Not satisfied with answer?")[0].strip()
                                 
                         except Exception as e:
-                            print(f"  Error getting answer: {e}")
+                           
                             continue
                         
                         if question_text and answer_text and len(question_text) > 10:
@@ -7294,17 +6953,13 @@ def scrape_admission_overview(driver, URLS):
                                 "question": question_text,
                                 "answer": answer_text[:500]
                             })
-                            print(f"  ✓ Added FAQ: {question_text[:50]}...")
-                            
+                           
                     except Exception as e:
-                        print(f"  Error processing FAQ item: {e}")
                         continue
-                
-                print(f"✓ Extracted {len(college_info['eligibility_selection']['faqs'])} FAQs")
                 
                 # If no FAQs found, try JavaScript approach (fixed)
                 if len(college_info["eligibility_selection"]["faqs"]) == 0:
-                    print("Trying JavaScript approach for FAQs...")
+                  
                     try:
                         faq_js_script = """
                         var faqs = [];
@@ -7353,43 +7008,21 @@ def scrape_admission_overview(driver, URLS):
                         js_faqs = driver.execute_script(faq_js_script)
                         if js_faqs:
                             college_info["eligibility_selection"]["faqs"] = js_faqs
-                            print(f"✓ JavaScript extracted {len(js_faqs)} FAQs")
+                         
                     except Exception as e:
-                        print(f"JavaScript FAQ extraction failed: {e}")
+                        print("JavaScript FAQ extraction failed: ")
                         
             except Exception as e:
-                print(f"⚠️ Error extracting eligibility FAQs: {e}")
+                print("⚠️ Error extracting eligibility FAQs: ")
                 
         except Exception as e:
-            print(f"⚠️ Eligibility section not found: {e}")
+            print("⚠️ Eligibility section not found: ")
         
     except Exception as e:
-        print(f"⚠️ Main error in scraping: {e}")
+        print("⚠️ Main error in scraping: ")
         import traceback
         traceback.print_exc()
-    
-    print("\n✓ Scraping completed")
-    
-    # Debug output
-    print("\n" + "="*50)
-    print("FINAL EXTRACTION RESULTS:")
-    print("="*50)
-    print(f"\nAdmission Overview:")
-    print(f"  Title: {college_info['admission_overview']['title']}")
-    print(f"  Description chars: {len(college_info['admission_overview']['description'])}")
-    print(f"  FAQs: {len(college_info['admission_overview']['faqs'])}")
-    
-    print(f"\nEligibility & Selection:")
-    print(f"  Title: {college_info['eligibility_selection']['title']}")
-    print(f"  Description chars: {len(college_info['eligibility_selection']['description'])}")
-    print(f"  Courses in table: {len(college_info['eligibility_selection']['courses_table'])}")
-    print(f"  FAQs: {len(college_info['eligibility_selection']['faqs'])}")
-    
-    if college_info["eligibility_selection"]["courses_table"]:
-        print("\nCourses found:")
-        for i, course in enumerate(college_info["eligibility_selection"]["courses_table"], 1):
-            print(f"  {i}. {course['course']}")
-    
+
     try:
         # Wait for admission process section
         admission_process_section = wait.until(
@@ -7418,8 +7051,7 @@ def scrape_admission_overview(driver, URLS):
         title_elem = soup.find('div', class_='ae88c4')
         if title_elem:
             admission_data["title"] = title_elem.get_text(strip=True)
-        print(f"✓ Admission Process title: {admission_data['title']}")
-        
+       
         # 2. Extract ALL Content - COMPLETE METHOD
         content_div = soup.find('div', id='EdContent__admission_section_admission_process')
         
@@ -7466,10 +7098,6 @@ def scrape_admission_overview(driver, URLS):
                     text = figure.get_text(strip=True)
                     if text:
                         admission_data["full_content"]["key_points"].append(text)
-            
-            print(f"✓ Extracted content: {len(admission_data['full_content']['paragraphs'])} paragraphs, "
-                  f"{len(admission_data['full_content']['headings'])} headings, "
-                  f"{len(admission_data['full_content']['lists'])} lists")
         
         # 3. Extract Fees Table - SIMPLIFIED
         fees_table = soup.find('table', style=lambda x: x and '620px' in str(x))
@@ -7483,8 +7111,7 @@ def scrape_admission_overview(driver, URLS):
                         "tuition_fee": cols[1].get_text(strip=True),
                         "average_package": cols[2].get_text(strip=True)
                     })
-            print(f"✓ Extracted {len(admission_data['fees_table'])} fees entries")
-        
+       
         # 4. Extract Seats Table - SIMPLIFIED
         seats_table = soup.find('table', class_='table _1708 d00e d8b0')
         if seats_table:
@@ -7496,9 +7123,7 @@ def scrape_admission_overview(driver, URLS):
                         "course": cols[0].get_text(strip=True),
                         "seats": cols[1].get_text(strip=True)
                     })
-            print(f"✓ Extracted {len(admission_data['seats_table'])} seat entries")
-        
-        # 5. Extract ALL Courses Data - COMPLETE METHOD
+                # 5. Extract ALL Courses Data - COMPLETE METHOD
         course_sections = soup.find_all('div', id=lambda x: x and 'admission_section_admission_process_bac_' in x)
         
         for course_section in course_sections:
@@ -7607,8 +7232,7 @@ def scrape_admission_overview(driver, URLS):
             if course_info:
                 admission_data["courses_data"].append(course_info)
         
-        print(f"✓ Extracted {len(admission_data['courses_data'])} course sections")
-        
+ 
         # 6. Extract FAQs from the main FAQ section - COMPLETE METHOD
         faq_section = soup.find('div', id='sectional-faqs-0')
         if faq_section:
@@ -7638,8 +7262,7 @@ def scrape_admission_overview(driver, URLS):
                 except Exception as e:
                     continue
             
-            print(f"✓ Extracted {len(admission_data['faqs'])} FAQs")
-        
+   
         # 7. Extract Videos
         video_widget = soup.find('div', id='reelsWidget')
         if video_widget:
@@ -7661,8 +7284,7 @@ def scrape_admission_overview(driver, URLS):
                 except Exception as e:
                     continue
             
-            print(f"✓ Extracted {len(admission_data['videos'])} videos")
-        
+     
         # 8. Extract Additional Content - links, notes, etc.
         additional_content = {}
         
@@ -7693,18 +7315,8 @@ def scrape_admission_overview(driver, URLS):
         # Add to college_info
         college_info["admission_process"] = admission_data
         
-        # Print summary
-        print(f"\n📊 ADMISSION PROCESS EXTRACTION SUMMARY:")
-        print(f"   • Title: {admission_data['title']}")
-        print(f"   • Paragraphs: {len(admission_data.get('full_content', {}).get('paragraphs', []))}")
-        print(f"   • Fees table entries: {len(admission_data['fees_table'])}")
-        print(f"   • Seats table entries: {len(admission_data['seats_table'])}")
-        print(f"   • Course sections: {len(admission_data['courses_data'])}")
-        print(f"   • FAQs: {len(admission_data['faqs'])}")
-        print(f"   • Videos: {len(admission_data['videos'])}")
-        
+   
     except Exception as e:
-        print(f"⚠️ Error extracting admission process: {e}")
         import traceback
         traceback.print_exc()
         # Add empty structure anyway
@@ -7749,18 +7361,18 @@ def scrape_placement_report(driver,URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
+            
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
+            
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract videos and photos count
         try:
@@ -7783,7 +7395,7 @@ def scrape_placement_report(driver,URLS):
         # Rest of your existing header extraction code...
         
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section: ")
     # ---------- COLLEGE HEADER ----------
     try:
         # Wait for page to load
@@ -7863,10 +7475,10 @@ def scrape_placement_report(driver,URLS):
                 pass
                 
         except Exception as e:
-            print(f"⚠️ Error extracting header info: {e}")
+            print("⚠️ Error extracting header info: ")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section: ")
     try:
         # Wait for placement section to load
         wait.until(EC.presence_of_element_located((By.ID, "placement_section_overview")))
@@ -7874,42 +7486,34 @@ def scrape_placement_report(driver,URLS):
         # Scroll to placement section
         driver.execute_script("window.scrollTo(0, 1000);")
         time.sleep(2)
-        
-        print("⏳ Looking for 'Read more' button to expand content...")
-        
-        # Try to find and click "Read more" button
+      
         try:
             # Look for "Read more" or "Read less" button
             read_more_buttons = driver.find_elements(By.XPATH, "//*[contains(text(), 'Read more') or contains(text(), 'Read less')]")
             
             if read_more_buttons:
-                print(f"✓ Found {len(read_more_buttons)} read more/less buttons")
-                
+            
                 # Click the first one that's visible
                 for button in read_more_buttons:
                     try:
                         if button.is_displayed():
-                            print("  Clicking 'Read more' button...")
+                          
                             driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", button)
                             time.sleep(1)
                             
                             # Use JavaScript click to avoid interception
                             driver.execute_script("arguments[0].click();", button)
-                            print("  ✓ Clicked 'Read more' button")
+                           
                             time.sleep(3)  # Wait for content to expand
                             break
                     except:
                         continue
             else:
-                print("✗ No 'Read more' button found")
+                pass
         except Exception as e:
-            print(f"⚠️ Error clicking read more button: {e}")
-        
-        # Wait for content to load after expansion
-        print("⏳ Waiting for expanded content to load...")
+            print("⚠️ Error clicking read more button: ")
         time.sleep(3)
         
-        # Scroll a bit to trigger any lazy loading
         driver.execute_script("window.scrollBy(0, 200);")
         time.sleep(2)
         
@@ -7931,8 +7535,7 @@ def scrape_placement_report(driver,URLS):
             return section.outerHTML;
         """, placement_section)
         
-        # Parse with BeautifulSoup
-        from bs4 import BeautifulSoup
+    
         soup = BeautifulSoup(section_html, 'html.parser')
         
         # Initialize placement data structure
@@ -7954,21 +7557,15 @@ def scrape_placement_report(driver,URLS):
         title_elem = soup.find('div', class_='ae88c4')
         if title_elem:
             placement_data["title"] = title_elem.get_text(strip=True)
-        print(f"✓ Placement title: {placement_data['title']}")
-        
+
         # Get the main content container
         content_div = soup.find('div', id='EdContent__placement_section_overview')
         
         if content_div:
-            print("✓ Found main content container")
-            
+        
             # Get complete text content
             complete_text = content_div.get_text(separator='\n', strip=True)
             placement_data["complete_content"] = complete_text
-            print(f"✓ Complete content length: {len(complete_text)} characters")
-            
-            # Extract paragraphs from the main content (not FAQ)
-            # Look for paragraphs in the main content area
             paragraphs = []
             
             # First, try to find the main content wrapper
@@ -7985,15 +7582,13 @@ def scrape_placement_report(driver,URLS):
                     paragraphs.append(text)
             
             placement_data["paragraphs"] = paragraphs
-            print(f"✓ Extracted {len(paragraphs)} main paragraphs")
-            
+           
             # Extract all tables from the entire section
             all_tables = []
             
             # Get tables from main content
             main_tables = content_div.find_all('table')
-            print(f"✓ Found {len(main_tables)} tables in main content")
-            
+        
             for i, table in enumerate(main_tables):
                 table_data = []
                 rows = table.find_all('tr')
@@ -8081,11 +7676,11 @@ def scrape_placement_report(driver,URLS):
                                         "answer": answer_text[:2000]  # Limit length
                                     })
                 except Exception as e:
-                    print(f"  Error parsing FAQ item: {e}")
+                  
                     continue
             
             placement_data["faqs"] = faqs
-            print(f"✓ Extracted {len(faqs)} FAQs")
+           
         
         # Add all tables to placement_data
         placement_data["tables"] = all_tables
@@ -8125,51 +7720,7 @@ def scrape_placement_report(driver,URLS):
         # Add to college_info
         college_info["placement_data"] = placement_data
         
-        # Print summary
-        print(f"\n{'='*80}")
-        print("✅ FINAL PLACEMENT DATA EXTRACTION COMPLETE:")
-        print(f"{'='*80}")
-        
-        print(f"\n📌 Title: {placement_data['title']}")
-        print(f"📝 Main Paragraphs: {len(placement_data.get('paragraphs', []))}")
-        print(f"📊 Total Tables: {len(placement_data.get('tables', []))}")
-        print(f"❓ FAQs: {len(placement_data.get('faqs', []))}")
-        print(f"⭐ Rating: {placement_data.get('rating', 'N/A')}")
-        print(f"🔗 Download Links: {len(placement_data.get('links', []))}")
-        print(f"🎥 Video Content: {'Yes' if placement_data.get('video_content') else 'No'}")
-        print(f"📄 Complete Content: {len(placement_data.get('complete_content', ''))} chars")
-        
-        # Show sample content
-        if placement_data.get("paragraphs"):
-            print(f"\n{'─'*40}")
-            print("📝 SAMPLE PARAGRAPHS:")
-            print(f"{'─'*40}")
-            for i, para in enumerate(placement_data["paragraphs"][:3], 1):
-                print(f"\n{i}. {para[:150]}...")
-        
-        if placement_data.get("tables"):
-            print(f"\n{'─'*40}")
-            print("📊 TABLE SUMMARY:")
-            print(f"{'─'*40}")
-            for table in placement_data["tables"]:
-                print(f"\n  Table {table.get('id')}:")
-                print(f"    Location: {table.get('location')}")
-                print(f"    Size: {table.get('rows')} rows x {table.get('columns')} columns")
-                if table.get("context"):
-                    print(f"    Context: {table.get('context')}")
-                if table.get("data") and len(table["data"]) > 0:
-                    print(f"    Headers: {table['data'][0]}")
-        
-        if placement_data.get("faqs"):
-            print(f"\n{'─'*40}")
-            print("❓ FAQ SAMPLES:")
-            print(f"{'─'*40}")
-            for i, faq in enumerate(placement_data["faqs"][:2], 1):
-                print(f"\n{i}. Q: {faq['question'][:80]}...")
-                print(f"   A: {faq['answer'][:120]}...")
-        
     except Exception as e:
-        print(f"\n⚠️ Error in placement data extraction: {e}")
         import traceback
         traceback.print_exc()
         
@@ -8194,9 +7745,7 @@ def scrape_placement_report(driver,URLS):
         driver.execute_script("window.scrollTo(0, 1500);")
         time.sleep(2)
         
-        print("⏳ Extracting Average Package section...")
-        
-        # Try to click "Read more" if exists
+
         try:
             read_buttons = driver.find_elements(By.XPATH, "//*[contains(text(), 'Read more') or contains(text(), 'Read less')]")
             for button in read_buttons:
@@ -8219,11 +7768,8 @@ def scrape_placement_report(driver,URLS):
             var section = arguments[0];
             return section.outerHTML;
         """, avg_package_section)
-        
-        print(f"✓ Retrieved Average Package section HTML length: {len(section_html)} characters")
-        
-        # Parse with BeautifulSoup
-        from bs4 import BeautifulSoup
+    
+   
         soup = BeautifulSoup(section_html, 'html.parser')
         
         # Initialize data structure
@@ -8242,8 +7788,7 @@ def scrape_placement_report(driver,URLS):
         title_elem = soup.find('div', class_='ae88c4')
         if title_elem:
             avg_package_data["title"] = title_elem.get_text(strip=True)
-        print(f"✓ Section title: {avg_package_data['title']}")
-        
+
         # Get the main content container
         content_div = soup.find('div', id='EdContent__placement_section_average_package')
         
@@ -8271,19 +7816,14 @@ def scrape_placement_report(driver,URLS):
                         table_data.append(row_data)
                 
                 avg_package_data["main_table"] = table_data
-                print(f"✓ Extracted main table: {len(table_data)} rows")
-            
+          
             # Extract introductory paragraph
             intro_paragraph = content_div.find('p')
             if intro_paragraph:
                 intro_text = intro_paragraph.get_text(strip=True)
                 intro_text = ' '.join(intro_text.split())
                 avg_package_data["intro_text"] = intro_text
-                print(f"✓ Intro text: {intro_text[:100]}...")
-        
-        # Extract Top Recruiters
-        print("\n🔍 Looking for Top Recruiters...")
-        
+      
         # Find the Top Recruiters section
         recruiters_section = soup.find('div', class_='ca08b1')
         if recruiters_section:
@@ -8301,15 +7841,13 @@ def scrape_placement_report(driver,URLS):
                     recruiters.append(recruiter_name)
             
             avg_package_data["top_recruiters"] = recruiters
-            print(f"✓ Found {len(recruiters)} top recruiters")
-            
+   
             # Sample recruiters
             if recruiters:
                 print(f"  Sample: {recruiters[:5]}")
         
         # Extract Insights on Placements
-        print("\n🔍 Looking for Insights...")
-        
+
         insights_section = soup.find('div', class_='b811f8')
         if insights_section:
             # Get insights heading
@@ -8346,27 +7884,21 @@ def scrape_placement_report(driver,URLS):
                 continue
         
         avg_package_data["insights"] = insights
-        print(f"✓ Found {len(insights)} insights")
-        
+       
         # Extract graph image
         graph_img = soup.find('img', alt=lambda x: x and 'Average Package graph' in x)
         if graph_img:
             graph_src = graph_img.get('src', '')
             if graph_src:
                 avg_package_data["graph_image"] = graph_src
-                print(f"✓ Found graph image: {graph_src[:50]}...")
-        
+             
         # Extract source information
         source_div = soup.find('div', class_='d4160c')
         if source_div:
             source_text = source_div.get_text(separator=' ', strip=True)
             source_text = ' '.join(source_text.split())
             avg_package_data["source_info"] = source_text
-            print(f"✓ Source info: {source_text}")
-        
-        # Extract FAQs from this section
-        print("\n🔍 Looking for FAQs...")
-        
+ 
         faq_section = soup.find('div', id='sectional-faqs-0')
         if faq_section:
             faqs = []
@@ -8423,11 +7955,11 @@ def scrape_placement_report(driver,URLS):
                                         "tables": faq_tables
                                     })
                 except Exception as e:
-                    print(f"  Error parsing FAQ item: {e}")
+                    
                     continue
             
             avg_package_data["faqs"] = faqs
-            print(f"✓ Extracted {len(faqs)} FAQs")
+            
         
         # Extract user feedback
         feedback_div = soup.find('div', class_='d79b7a')
@@ -8441,52 +7973,6 @@ def scrape_placement_report(driver,URLS):
             college_info["placement_sections"] = {}
         
         college_info["placement_sections"]["average_package"] = avg_package_data
-        
-        # Print detailed summary
-        print(f"\n{'='*80}")
-        print("📊 AVERAGE PACKAGE SECTION EXTRACTION COMPLETE:")
-        print(f"{'='*80}")
-        
-        print(f"\n📌 Title: {avg_package_data['title']}")
-        
-        if avg_package_data.get("main_table"):
-            print(f"\n📊 MAIN TABLE:")
-            table = avg_package_data["main_table"]
-            print(f"  Rows: {len(table)}")
-            print(f"  Columns: {len(table[0]) if table else 0}")
-            if len(table) > 0:
-                print(f"  Headers: {table[0]}")
-            if len(table) > 1:
-                print(f"  Sample data:")
-                for i in range(1, min(4, len(table))):
-                    print(f"    {table[i]}")
-        
-        if avg_package_data.get("top_recruiters"):
-            print(f"\n🏢 TOP RECRUITERS:")
-            print(f"  Total: {len(avg_package_data['top_recruiters'])} companies")
-            print(f"  Sample: {', '.join(avg_package_data['top_recruiters'][:5])}")
-        
-        if avg_package_data.get("insights"):
-            print(f"\n💡 INSIGHTS:")
-            print(f"  Total: {len(avg_package_data['insights'])} insights")
-            for i, insight in enumerate(avg_package_data["insights"][:3], 1):
-                print(f"  {i}. {insight['title']}: {insight['description']}")
-        
-        if avg_package_data.get("faqs"):
-            print(f"\n❓ FAQs:")
-            print(f"  Total: {len(avg_package_data['faqs'])} questions")
-            for i, faq in enumerate(avg_package_data["faqs"][:2], 1):
-                print(f"  {i}. Q: {faq['question'][:80]}...")
-                if faq.get("tables"):
-                    print(f"     Contains {len(faq['tables'])} tables")
-        
-        if avg_package_data.get("graph_image"):
-            print(f"\n📈 GRAPH IMAGE:")
-            print(f"  URL: {avg_package_data['graph_image'][:80]}...")
-        
-        if avg_package_data.get("source_info"):
-            print(f"\n📋 SOURCE:")
-            print(f"  {avg_package_data['source_info']}")
         
         # Also add to main placement_data for backward compatibility
         if "placement_data" not in college_info:
@@ -8511,7 +7997,6 @@ def scrape_placement_report(driver,URLS):
             college_info["placement_data"]["insights"] = avg_package_data["insights"]
         
     except Exception as e:
-        print(f"\n⚠️ Error extracting Average Package section: {e}")
         import traceback
         traceback.print_exc()
         
@@ -8538,8 +8023,6 @@ def scrape_placement_report(driver,URLS):
         driver.execute_script("window.scrollTo(0, 2000);")
         time.sleep(2)
         
-        print("⏳ Extracting PGP Placements section...")
-        
         # Click "Read more" if exists in this section
         try:
             section_element = driver.find_element(By.ID, "placement_section_about_baseCourse_101")
@@ -8562,7 +8045,7 @@ def scrape_placement_report(driver,URLS):
             fabm_header = fabm_accordion.find_element(By.CLASS_NAME, "ca7e28")
             if fabm_header:
                 driver.execute_script("arguments[0].click();", fabm_header)
-                print("✓ Expanded PGP FABM accordion")
+                
                 time.sleep(2)
         except:
             pass
@@ -8574,10 +8057,6 @@ def scrape_placement_report(driver,URLS):
             return section.outerHTML;
         """, pgp_section)
         
-        print(f"✓ Retrieved PGP Placements section HTML length: {len(section_html)} characters")
-        
-        # Parse with BeautifulSoup
-        from bs4 import BeautifulSoup
         soup = BeautifulSoup(section_html, 'html.parser')
         
         # Initialize data structure
@@ -8597,9 +8076,7 @@ def scrape_placement_report(driver,URLS):
         title_elem = soup.find('div', class_='ae88c4')
         if title_elem:
             pgp_placements_data["title"] = title_elem.get_text(strip=True)
-        print(f"✓ Section title: {pgp_placements_data['title']}")
-        
-        # Extract introductory text
+
         content_div = soup.find('div', id='EdContent_')
         if content_div:
             intro_text = content_div.get_text(separator='\n', strip=True)
@@ -8613,11 +8090,7 @@ def scrape_placement_report(driver,URLS):
                 
                 pgp_placements_data["intro_text"] = intro_para
                 pgp_placements_data["key_points_text"] = key_para
-                
-                print(f"✓ Intro: {intro_para[:100]}...")
-        
-        # Extract main PGP statistics table
-        print("\n🔍 Extracting main PGP statistics table...")
+          
         
         main_table = soup.find('table', class_='table d7ad5f f866a4 dc8ace')
         if main_table:
@@ -8656,8 +8129,7 @@ def scrape_placement_report(driver,URLS):
                         table_data.append(row_data)
             
             pgp_placements_data["main_table"] = table_data
-            print(f"✓ Extracted main table: {len(table_data)-1} data rows")
-            
+       
             # Show sample
             if len(table_data) > 1:
                 print(f"  Sample row: {table_data[1]}")
@@ -8668,9 +8140,6 @@ def scrape_placement_report(driver,URLS):
             source_text = source_div.get_text(separator=' ', strip=True)
             source_text = ' '.join(source_text.split())
             pgp_placements_data["source_info"] = source_text
-        
-        # Extract Placement Comparison table
-        print("\n🔍 Extracting Placement Comparison table...")
         
         comparison_div = soup.find('div', id='placement_section_placement_comparison')
         if comparison_div:
@@ -8704,16 +8173,13 @@ def scrape_placement_report(driver,URLS):
                             comparison_data.append(row_data)
                 
                 pgp_placements_data["placement_comparison"] = comparison_data
-                print(f"✓ Extracted comparison table: {len(comparison_data)-1} colleges")
-                
+               
                 # Extract source note
                 source_note = comparison_div.find('i', class_='da39de')
                 if source_note:
                     pgp_placements_data["comparison_note"] = source_note.get_text(strip=True)
         
-        # Extract PGP FABM Placements data
-        print("\n🔍 Extracting PGP FABM Placements data...")
-        
+       
         fabm_section = soup.find('div', id='placement_section_class_profile')
         if fabm_section:
             fabm_data = {
@@ -8749,18 +8215,14 @@ def scrape_placement_report(driver,URLS):
                     fabm_data["table"] = fabm_table_data
             
             pgp_placements_data["pgp_fabm_data"] = fabm_data
-            print(f"✓ Extracted PGP FABM data with {len(fabm_data.get('table', []))} table rows")
-        
+          
         # Extract Placement rating
         rating_div = soup.find('div', class_='bdb2d9')
         if rating_div:
             rating_text = rating_div.get_text(strip=True)
             pgp_placements_data["placement_rating"] = rating_text
-            print(f"✓ Placement rating: {rating_text}")
-        
-        # Extract FAQs from this section
-        print("\n🔍 Extracting FAQs...")
-        
+            
+      
         faq_section = soup.find('div', id='sectional-faqs-0')
         if faq_section:
             faqs = []
@@ -8822,12 +8284,11 @@ def scrape_placement_report(driver,URLS):
                                         "table_count": len(faq_tables)
                                     })
                 except Exception as e:
-                    print(f"  Error parsing FAQ item: {e}")
+                   
                     continue
             
             pgp_placements_data["faqs"] = faqs
-            print(f"✓ Extracted {len(faqs)} FAQs with total {sum(f.get('table_count', 0) for f in faqs)} tables")
-        
+         
         # Extract user feedback
         feedback_div = soup.find('div', class_='d79b7a')
         if feedback_div:
@@ -8860,58 +8321,8 @@ def scrape_placement_report(driver,URLS):
                 college_info["placement_data"]["faqs"] = []
             
             college_info["placement_data"]["faqs"].extend(pgp_placements_data["faqs"])
-        
-        # Print detailed summary
-        print(f"\n{'='*80}")
-        print("📊 PGP PLACEMENTS SECTION EXTRACTION COMPLETE:")
-        print(f"{'='*80}")
-        
-        print(f"\n📌 Title: {pgp_placements_data['title']}")
-        
-        if pgp_placements_data.get("main_table"):
-            table = pgp_placements_data["main_table"]
-            print(f"\n📊 PGP STATISTICS TABLE:")
-            print(f"  Rows: {len(table)}")
-            print(f"  Columns: {len(table[0]) if table else 0}")
-            if len(table) > 0:
-                print(f"  Headers: {table[0]}")
-            if len(table) > 1:
-                print(f"  Sample data (Students Placed): {table[1]}")
-        
-        if pgp_placements_data.get("placement_comparison"):
-            comp_table = pgp_placements_data["placement_comparison"]
-            print(f"\n📈 PLACEMENT COMPARISON:")
-            print(f"  Compared with {len(comp_table)-1} other colleges")
-            if len(comp_table) > 1:
-                print(f"  Sample comparison: {comp_table[1][0]} - Avg: {comp_table[1][1]}, High: {comp_table[1][2]}")
-        
-        if pgp_placements_data.get("pgp_fabm_data"):
-            fabm = pgp_placements_data["pgp_fabm_data"]
-            print(f"\n🌾 PGP FABM DATA:")
-            print(f"  Title: {fabm.get('title', 'N/A')}")
-            if fabm.get("table"):
-                print(f"  Table: {len(fabm['table'])} rows")
-        
-        if pgp_placements_data.get("faqs"):
-            print(f"\n❓ FAQs:")
-            print(f"  Total: {len(pgp_placements_data['faqs'])} questions")
-            total_tables = sum(f.get('table_count', 0) for f in pgp_placements_data["faqs"])
-            print(f"  Total tables in FAQs: {total_tables}")
-            
-            for i, faq in enumerate(pgp_placements_data["faqs"][:3], 1):
-                print(f"\n  {i}. Q: {faq['question'][:80]}...")
-                if faq.get("table_count", 0) > 0:
-                    print(f"     Contains {faq['table_count']} tables")
-        
-        if pgp_placements_data.get("placement_rating"):
-            print(f"\n⭐ PLACEMENT RATING:")
-            print(f"  {pgp_placements_data['placement_rating']}")
-        
-        # Save debug HTML if needed
-     
-        
     except Exception as e:
-        print(f"\n⚠️ Error extracting PGP Placements section: {e}")
+        
         import traceback
         traceback.print_exc()
         
@@ -8973,18 +8384,18 @@ def scrape_cutoff(driver, URLS):
             top_header_section = driver.find_element(By.ID, "topHeaderCard-top-section")
             cover_img = top_header_section.find_element(By.ID, "topHeaderCard-gallery-image")
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found: {college_info['cover_image']}")
+            
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_div = driver.find_element(By.CSS_SELECTOR, ".ca46d2.e014b3")
             logo_img = logo_div.find_element(By.TAG_NAME, "img")
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found: {college_info['logo']}")
+         
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract videos and photos count
         try:
@@ -9078,16 +8489,14 @@ def scrape_cutoff(driver, URLS):
                 pass
                 
         except Exception as e:
-            print(f"⚠️ Error extracting header info: {e}")
+            print("⚠️ Error extracting header info: ")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section: ")
     
     # ---------- CUTOFF DATA SCRAPING ----------
     try:
-        print("\n=== Scraping Cutoff Data ===")
-        
-        # Wait for cutoff section to load and be visible
+
         try:
             cutoff_section = wait.until(
                 EC.presence_of_element_located((By.ID, "icop_section_exams"))
@@ -9097,11 +8506,10 @@ def scrape_cutoff(driver, URLS):
             time.sleep(2)  # Wait for lazy loading
             
         except Exception as e:
-            print(f"⚠️ Could not find cutoff section: {e}")
+            print("⚠️ Could not find cutoff section: ")
             return college_info
         
-        # 1. Scrape Qualifying Cutoff Table
-        print("Looking for qualifying cutoff table...")
+        
         try:
             # Wait for table to load with dynamic content
             time.sleep(3)
@@ -9112,13 +8520,13 @@ def scrape_cutoff(driver, URLS):
             # Strategy 1: Look for table with specific class/id
             try:
                 qualifying_table = driver.find_element(By.CSS_SELECTOR, "table.iima-table-id-7902")
-                print("Found qualifying table by specific class")
+               
             except:
                 # Strategy 2: Look for table containing specific headers
                 qualifying_tables = driver.find_elements(By.XPATH, "//table[.//th[contains(text(), 'VARC')] and .//th[contains(text(), 'DILR')] and .//th[contains(text(), 'QA')]]")
                 if qualifying_tables:
                     qualifying_table = qualifying_tables[0]
-                    print("Found qualifying table by headers")
+                   
                 else:
                     # Strategy 3: Look in the expanded qualifying cutoff section
                     try:
@@ -9128,7 +8536,7 @@ def scrape_cutoff(driver, URLS):
                         qualifying_tables = qualifying_section.find_elements(By.TAG_NAME, "table")
                         if qualifying_tables:
                             qualifying_table = qualifying_tables[0]
-                            print("Found qualifying table in expanded section")
+                           
                     except:
                         pass
             
@@ -9148,32 +8556,13 @@ def scrape_cutoff(driver, URLS):
                                 "Overall": cells[4].text.strip()
                             }
                 
-                if college_info["cutoff_data"]["qualifying_cutoff"]:
-                    print(f"✓ Qualifying cutoff data scraped: {len(college_info['cutoff_data']['qualifying_cutoff'])} categories")
-                    print(f"Categories: {list(college_info['cutoff_data']['qualifying_cutoff'].keys())}")
-                else:
-                    # Try alternative parsing method
-                    print("Trying alternative parsing method...")
-                    table_html = qualifying_table.get_attribute('outerHTML')
-                    if "General, EWS" in table_html:
-                        # Parse the table content from HTML
-                        lines = table_html.split('\n')
-                        for line in lines:
-                            if '<td' in line and '</td>' in line:
-                                # Extract text between > and <
-                                match = re.search(r'>([^<]+)<', line)
-                                if match:
-                                    print(f"Found cell: {match.group(1)}")
+    
             else:
-                print("⚠️ Could not find qualifying cutoff table")
-                # Print all tables for debugging
-                tables = driver.find_elements(By.TAG_NAME, "table")
-                print(f"Found {len(tables)} tables on page")
-                for i, table in enumerate(tables):
-                    print(f"Table {i+1}: {table.get_attribute('class')}")
+                pass
+               
         
         except Exception as e:
-            print(f"⚠️ Error scraping qualifying cutoff: {e}")
+           
             import traceback
             traceback.print_exc()
         
@@ -9186,8 +8575,7 @@ def scrape_cutoff(driver, URLS):
             
             # Find all year-wise cutoff tables
             cutoff_tables = driver.find_elements(By.CSS_SELECTOR, ".table.a82bdd.f866a4.dc8ace")
-            print(f"Found {len(cutoff_tables)} cutoff tables")
-            
+          
             for table_index, table in enumerate(cutoff_tables):
                 try:
                     # Get table headers to determine table type
@@ -9249,13 +8637,12 @@ def scrape_cutoff(driver, URLS):
                             print(f"  Added year-wise cutoff for: {course_name}")
                 
                 except Exception as e:
-                    print(f"  Skipping table {table_index + 1}: {e}")
+                    
                     continue
             
-            print(f"✓ Year-wise cutoff data scraped: {len(college_info['cutoff_data']['year_wise_cutoff'])} courses")
-        
+          
         except Exception as e:
-            print(f"⚠️ Error scraping year-wise cutoff: {e}")
+            print("⚠️ Error scraping year-wise cutoff: ")
         
         # 3. Scrape College Comparison Table
         try:
@@ -9332,12 +8719,12 @@ def scrape_cutoff(driver, URLS):
                         unique_comparisons.append(comp)
                 
                 college_info["cutoff_data"]["college_comparison"] = unique_comparisons
-                print(f"✓ College comparison data scraped: {len(college_info['cutoff_data']['college_comparison'])} unique colleges")
+
             else:
-                print("⚠️ No college comparison table found")
+                pass
         
         except Exception as e:
-            print(f"⚠️ Error scraping college comparison: {e}")
+            print("⚠️ Error scraping college comparison: ")
         
         # 4. Scrape FAQ Questions
         try:
@@ -9366,10 +8753,9 @@ def scrape_cutoff(driver, URLS):
             
             # Remove duplicates
             college_info["cutoff_data"]["faqs"] = list(dict.fromkeys(college_info["cutoff_data"]["faqs"]))
-            print(f"✓ FAQ data scraped: {len(college_info['cutoff_data']['faqs'])} unique questions")
-        
+          
         except Exception as e:
-            print(f"⚠️ Error scraping FAQs: {e}")
+            print("⚠️ Error scraping FAQs: ")
         
         # 5. Scrape Description
         try:
@@ -9390,13 +8776,12 @@ def scrape_cutoff(driver, URLS):
                 except:
                     continue
             
-            print(f"✓ Description scraped: {len(college_info['cutoff_data']['description'])} paragraphs")
-        
+           
         except Exception as e:
-            print(f"⚠️ Error scraping description: {e}")
+            print("⚠️ Error scraping description: ")
     
     except Exception as e:
-        print(f"⚠️ Error in cutoff data section: {e}")
+        print("⚠️ Error in cutoff data section: ")
         import traceback
         traceback.print_exc()
     
@@ -9421,35 +8806,33 @@ def scrape_ranking(driver, URLS):
         "established_year": None,
     }
     
-    # ---------- WAIT FOR PAGE TO FULLY LOAD ----------
-    print("Waiting for page to fully load...")
+
     time.sleep(7)  # Increased initial wait
     
     try:
         # Wait for specific elements to ensure page is loaded
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.cc5e8d")))
-        print("✓ Page loaded successfully")
+        
     except:
-        print("⚠️ Page loading timeout")
+        pass
     
-    # ---------- COLLEGE HEADER ----------
-    print("\nExtracting college header information...")
+
     try:
         # Extract cover image
         try:
             cover_img = wait.until(EC.presence_of_element_located((By.ID, "topHeaderCard-gallery-image")))
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found")
+            
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_img = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ca46d2.e014b3 img")))
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found")
+           
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract college name - FIXED: Get proper college name
         try:
@@ -9482,10 +8865,8 @@ def scrape_ranking(driver, URLS):
                     if text and "IIM" in text:
                         college_info["college_name"] = text.split("Ranking")[0].strip()
                         break
-            
-            print(f"✓ College name: {college_info['college_name']}")
         except:
-            print("⚠️ College name not found")
+            pass
         
         # Extract videos and photos count - FIXED
         try:
@@ -9502,10 +8883,8 @@ def scrape_ranking(driver, URLS):
                     match = re.search(r'(\d+)\s*photos?', text, re.IGNORECASE)
                     if match:
                         college_info["photos_count"] = int(match.group(1))
-            
-            print(f"✓ Videos: {college_info['videos_count']}, Photos: {college_info['photos_count']}")
         except:
-            print("⚠️ Videos/Photos count not found")
+            pass
         
         # Extract location
         try:
@@ -9515,9 +8894,9 @@ def scrape_ranking(driver, URLS):
                 parts = [p.strip() for p in location_text.split(",", 1)]
                 college_info["location"] = parts[0].replace(",", "").strip()
                 college_info["city"] = parts[1] if len(parts) > 1 else ""
-            print(f"✓ Location: {college_info['location']}, {college_info['city']}")
+           
         except:
-            print("⚠️ Location not found")
+            pass
         
         # Extract rating and reviews
         try:
@@ -9532,9 +8911,9 @@ def scrape_ranking(driver, URLS):
             if reviews_match:
                 college_info["reviews_count"] = int(reviews_match.group(1))
             
-            print(f"✓ Rating: {college_info['rating']}, Reviews: {college_info['reviews_count']}")
+
         except:
-            print("⚠️ Rating/Reviews not found")
+            pass
         
         # Extract Q&A count - FIXED
         try:
@@ -9553,10 +8932,8 @@ def scrape_ranking(driver, URLS):
                         else:
                             college_info["qa_count"] = int(float(num_text))
                         break
-            
-            print(f"✓ Q&A count: {college_info['qa_count']}")
         except:
-            print("⚠️ Q&A count not found")
+            pass
         
         # Extract other details
         try:
@@ -9570,21 +8947,15 @@ def scrape_ranking(driver, URLS):
                     if year_match:
                         college_info["established_year"] = year_match.group(1)
             
-            print(f"✓ Institute type: {college_info['institute_type']}")
-            print(f"✓ Established year: {college_info['established_year']}")
+  
         except:
             print("⚠️ Institute details not found")
             
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print("⚠️ Error in college header section: ")
         import traceback
         traceback.print_exc()
-    
-    # ---------- RANKING DATA SCRAPING ----------
-    print("\n" + "="*50)
-    print("EXTRACTING RANKING DATA...")
-    print("="*50)
-    
+
     ranking_data = {
         "highlights": {"description": "", "rankings": []},
         "international_ranking": {"description": "", "qs_ranking": {}, "financial_times_ranking": {}},
@@ -9595,8 +8966,7 @@ def scrape_ranking(driver, URLS):
         "table_of_contents": []
     }
     
-    # Execute JavaScript to check if content is loaded
-    print("Checking page content with JavaScript...")
+
     try:
         # Use JavaScript to check for specific elements
         js_check = driver.execute_script("""
@@ -9607,12 +8977,11 @@ def scrape_ranking(driver, URLS):
                 rankingSections: document.querySelectorAll('[id^="rp_section_"]').length
             };
         """)
-        print(f"✓ JavaScript check: {js_check}")
+     
     except Exception as e:
-        print(f"⚠️ JavaScript check failed: {e}")
+        print("⚠️ JavaScript check failed: ")
     
-    # Scroll to load all content
-    print("Scrolling to load all content...")
+  
     try:
         # Scroll multiple times to trigger lazy loading
         for i in range(5):
@@ -9629,11 +8998,11 @@ def scrape_ranking(driver, URLS):
         time.sleep(2)
         
     except Exception as e:
-        print(f"⚠️ Error during scrolling: {e}")
+        print("⚠️ Error during scrolling: ")
     
     # Helper function to expand all sections
     def expand_all_sections():
-        print("Expanding all collapsed sections...")
+       
         try:
             # Find all "Read more" buttons
             read_more_buttons = driver.find_elements(By.XPATH, "//span[contains(text(), 'Read more')]")
@@ -9663,7 +9032,7 @@ def scrape_ranking(driver, URLS):
                     
             return True
         except Exception as e:
-            print(f"⚠️ Error expanding sections: {e}")
+            
             return False
     
     # Expand all sections first
@@ -9704,11 +9073,9 @@ def scrape_ranking(driver, URLS):
         
         if toc_items_js:
             ranking_data["table_of_contents"] = toc_items_js
-            print(f"✓ Found {len(ranking_data['table_of_contents'])} TOC items using JavaScript")
-            print(f"  Items: {ranking_data['table_of_contents']}")
+            
         else:
-            # Fallback to Python extraction
-            print("JavaScript extraction failed, trying Python...")
+            
             try:
                 toc_section = wait.until(EC.presence_of_element_located((By.ID, "newTocSection")))
                 toc_items = toc_section.find_elements(By.CSS_SELECTOR, ".c27cda.newTocListV2 li, #newTocSection li")
@@ -9729,16 +9096,14 @@ def scrape_ranking(driver, URLS):
                                 ranking_data["table_of_contents"].append(text)
                     except:
                         continue
-                
-                print(f"✓ Found {len(ranking_data['table_of_contents'])} TOC items using Python")
+              
             except Exception as e:
-                print(f"⚠️ TOC extraction failed: {e}")
+                print("⚠️ TOC extraction failed: ")
                 
     except Exception as e:
-        print(f"⚠️ TOC not found: {e}")
+        print("⚠️ TOC not found: ")
     
-    # 2. RANKING HIGHLIGHTS
-    print("\n2. Extracting Ranking Highlights...")
+ 
     try:
         highlights_section = wait.until(EC.presence_of_element_located((By.ID, "rp_section_highlights")))
         driver.execute_script("arguments[0].scrollIntoView(true);", highlights_section)
@@ -9751,14 +9116,14 @@ def scrape_ranking(driver, URLS):
         try:
             description_elem = highlights_section.find_element(By.CSS_SELECTOR, ".wikiContents")
             ranking_data["highlights"]["description"] = description_elem.text.strip()
-            print(f"✓ Highlights description extracted")
+         
         except:
             pass
         
         # Extract ranking cards
         try:
             ranking_cards = highlights_section.find_elements(By.CSS_SELECTOR, ".f35625, .bc4a0d")
-            print(f"✓ Found {len(ranking_cards)} ranking cards")
+        
             
             for card in ranking_cards:
                 try:
@@ -9807,13 +9172,11 @@ def scrape_ranking(driver, URLS):
                     continue
                     
         except Exception as e:
-            print(f"⚠️ Error extracting ranking cards: {e}")
+            print("⚠️ Error extracting ranking cards: ")
             
     except Exception as e:
-        print(f"⚠️ Error in highlights section: {e}")
-    
-    # 3. NIRF RANKING
-    print("\n3. Extracting NIRF Ranking...")
+        print("⚠️ Error in highlights section: ")
+   
     try:
         nirf_section = wait.until(EC.presence_of_element_located((By.ID, "rp_section_publishers_8")))
         driver.execute_script("arguments[0].scrollIntoView(true);", nirf_section)
@@ -9826,7 +9189,7 @@ def scrape_ranking(driver, URLS):
         try:
             nirf_content = nirf_section.find_element(By.CSS_SELECTOR, ".wikiContents")
             ranking_data["nirf"]["description"] = nirf_content.text.strip()
-            print(f"✓ NIRF description extracted")
+            print("✓ NIRF description extracted")
         except:
             pass
         
@@ -9850,9 +9213,9 @@ def scrape_ranking(driver, URLS):
                                 row_data[headers[i]] = cell.text.strip()
                         ranking_data["nirf"]["table_data"].append(row_data)
                 
-                print(f"✓ NIRF table data extracted: {len(ranking_data['nirf']['table_data'])} rows")
+                print("✓ NIRF table data extracted: {len(ranking_data['nirf']['table_data'])} rows")
         except Exception as e:
-            print(f"⚠️ Error extracting NIRF table: {e}")
+            print("⚠️ Error extracting NIRF table: ")
         
         # Extract comparison data
         try:
@@ -9880,14 +9243,13 @@ def scrape_ranking(driver, URLS):
                                         "college": college_name,
                                         "rank": rank
                                     })
-                            
-                            print(f"✓ NIRF comparison data extracted: {len(ranking_data['nirf']['comparison'])} colleges")
+
                             break
                 except:
                     continue
                     
         except Exception as e:
-            print(f"⚠️ Error extracting NIRF comparison: {e}")
+            print("⚠️ Error extracting NIRF comparison: ")
             
         # Extract ranking criteria using JavaScript
         try:
@@ -9917,15 +9279,14 @@ def scrape_ranking(driver, URLS):
             
             if criteria_data:
                 ranking_data["nirf"]["ranking_criteria"] = criteria_data
-                print(f"✓ NIRF ranking criteria extracted: {len(criteria_data)} criteria")
+           
         except:
             ranking_data["nirf"]["ranking_criteria"] = {}
             
     except Exception as e:
-        print(f"⚠️ Error in NIRF section: {e}")
+        print("⚠️ Error in NIRF section: ")
     
-    # 4. OUTLOOK RANKING
-    print("\n4. Extracting Outlook Ranking...")
+
     try:
         outlook_section = wait.until(EC.presence_of_element_located((By.ID, "rp_section_publishers_3")))
         driver.execute_script("arguments[0].scrollIntoView(true);", outlook_section)
@@ -9937,7 +9298,7 @@ def scrape_ranking(driver, URLS):
         try:
             outlook_content = outlook_section.find_element(By.CSS_SELECTOR, ".wikiContents")
             ranking_data["outlook"]["description"] = outlook_content.text.strip()
-            print(f"✓ Outlook description extracted")
+      
         except:
             pass
         
@@ -9960,10 +9321,9 @@ def scrape_ranking(driver, URLS):
                             if i < len(headers):
                                 row_data[headers[i]] = cell.text.strip()
                         ranking_data["outlook"]["table_data"].append(row_data)
-                
-                print(f"✓ Outlook table data extracted: {len(ranking_data['outlook']['table_data'])} rows")
+
         except Exception as e:
-            print(f"⚠️ Error extracting Outlook table: {e}")
+            print("⚠️ Error extracting Outlook table: ")
         
         # Extract comparison data
         try:
@@ -9986,20 +9346,18 @@ def scrape_ranking(driver, URLS):
                                     "college": college_name,
                                     "rank": rank
                                 })
-                        
-                        print(f"✓ Outlook comparison data extracted: {len(ranking_data['outlook']['comparison'])} colleges")
+
                         break
                 except:
                     continue
                     
         except Exception as e:
-            print(f"⚠️ Error extracting Outlook comparison: {e}")
+            print("⚠️ Error extracting Outlook comparison: ")
             
     except Exception as e:
-        print(f"⚠️ Error in Outlook section: {e}")
+        print("⚠️ Error in Outlook section: ")
     
-    # 5. BUSINESS TODAY RANKING
-    print("\n5. Extracting Business Today Ranking...")
+   
     try:
         bt_section = wait.until(EC.presence_of_element_located((By.ID, "rp_section_publishers_2")))
         driver.execute_script("arguments[0].scrollIntoView(true);", bt_section)
@@ -10024,10 +9382,8 @@ def scrape_ranking(driver, URLS):
                             if i < len(headers):
                                 row_data[headers[i]] = cell.text.strip()
                         ranking_data["business_today"]["table_data"].append(row_data)
-                
-                print(f"✓ Business Today table data extracted: {len(ranking_data['business_today']['table_data'])} rows")
         except Exception as e:
-            print(f"⚠️ Error extracting Business Today table: {e}")
+            print("⚠️ Error extracting Business Today table: ")
         
         # Extract comparison data
         try:
@@ -10050,20 +9406,18 @@ def scrape_ranking(driver, URLS):
                                     "college": college_name,
                                     "rank": rank
                                 })
-                        
-                        print(f"✓ Business Today comparison data extracted: {len(ranking_data['business_today']['comparison'])} colleges")
+
                         break
                 except:
                     continue
                     
         except Exception as e:
-            print(f"⚠️ Error extracting Business Today comparison: {e}")
+            print("⚠️ Error extracting Business Today comparison: ")
             
     except Exception as e:
-        print(f"⚠️ Error in Business Today section: {e}")
+        print("⚠️ Error in Business Today section: ")
     
-    # 6. QS WORLD RANKING
-    print("\n6. Extracting QS World Ranking...")
+
     try:
         qs_section = wait.until(EC.presence_of_element_located((By.ID, "rp_section_publishers_237")))
         driver.execute_script("arguments[0].scrollIntoView(true);", qs_section)
@@ -10075,7 +9429,7 @@ def scrape_ranking(driver, URLS):
         try:
             qs_content = qs_section.find_element(By.CSS_SELECTOR, ".wikiContents")
             ranking_data["qs_world"]["description"] = qs_content.text.strip()
-            print(f"✓ QS World description extracted")
+          
             
             # Extract detailed QS ranking table using JavaScript
             try:
@@ -10133,12 +9487,12 @@ def scrape_ranking(driver, URLS):
                 
                 if qs_data:
                     ranking_data["qs_world"]["rankings"] = qs_data
-                    print(f"✓ QS detailed ranking table extracted: {list(qs_data.keys())}")
+                 
             except Exception as table_error:
-                print(f"⚠️ Error extracting QS detailed table: {table_error}")
+                print("⚠️ Error extracting QS detailed table: ")
                 
         except Exception as e:
-            print(f"⚠️ Error extracting QS description: {e}")
+            print("⚠️ Error extracting QS description: ")
         
         # Extract comparison data using JavaScript
         try:
@@ -10192,16 +9546,14 @@ def scrape_ranking(driver, URLS):
             
             if comparison_data:
                 ranking_data["qs_world"]["comparison"] = comparison_data
-                print(f"✓ QS comparison data extracted: {len(comparison_data)} colleges")
-                
+              
         except Exception as e:
-            print(f"⚠️ Error extracting QS comparison: {e}")
+            print("⚠️ Error extracting QS comparison: ")
             
     except Exception as e:
-        print(f"⚠️ Error in QS World section: {e}")
+        print("⚠️ Error in QS World section: ")
     
-    # 7. INTERNATIONAL RANKING - COMPLETELY REWRITTEN WITH JAVASCRIPT
-    print("\n7. Extracting International Ranking...")
+
     try:
         intl_section = wait.until(EC.presence_of_element_located((By.ID, "rp_section_international_ranking")))
         driver.execute_script("arguments[0].scrollIntoView(true);", intl_section)
@@ -10296,22 +9648,15 @@ def scrape_ranking(driver, URLS):
             ranking_data["international_ranking"]["qs_ranking"] = intl_data.get("qs_ranking", {})
             ranking_data["international_ranking"]["financial_times_ranking"] = intl_data.get("financial_times_ranking", {})
             
-            print(f"✓ International ranking description extracted")
-            
-            if intl_data.get("qs_ranking", {}):
-                print(f"✓ QS international rankings extracted: {list(intl_data['qs_ranking'].keys())}")
-            if intl_data.get("financial_times_ranking", {}):
-                print(f"✓ Financial Times rankings extracted: {list(intl_data['financial_times_ranking'].keys())}")
-                
+   
         except Exception as e:
-            print(f"⚠️ Error extracting international content with JavaScript: {e}")
+            print("⚠️ Error extracting international content with JavaScript: ")
             
             # Fallback to Python extraction
             try:
                 intl_content = intl_section.find_element(By.CSS_SELECTOR, ".wikiContents")
                 ranking_data["international_ranking"]["description"] = intl_content.text.strip()
-                print(f"✓ International ranking description extracted (fallback)")
-                
+              
                 # Try to extract tables with Python
                 try:
                     tables = intl_content.find_elements(By.TAG_NAME, "table")
@@ -10346,36 +9691,20 @@ def scrape_ranking(driver, URLS):
                                             "2023": cells[3].text.strip()
                                         }
                 except Exception as table_error:
-                    print(f"⚠️ Error extracting tables: {table_error}")
+                    print("⚠️ Error extracting tables: {table_error}")
                     
             except Exception as fallback_error:
-                print(f"⚠️ Fallback extraction failed: {fallback_error}")
+                print("⚠️ Fallback extraction failed: {fallback_error}")
             
     except Exception as e:
-        print(f"⚠️ Error in International ranking section: {e}")
+        print("⚠️ Error in International ranking section: ")
         import traceback
         traceback.print_exc()
     
     # Add ranking data to college_info
     college_info["ranking_data"] = ranking_data
     
-    # FINAL SUMMARY
-    print("\n" + "="*50)
-    print("EXTRACTION COMPLETE - SUMMARY")
-    print("="*50)
-    print(f"✓ College: {college_info.get('college_name', 'N/A')}")
-    print(f"✓ Rating: {college_info.get('rating', 'N/A')} ({college_info.get('reviews_count', 'N/A')} reviews)")
-    print(f"✓ Videos: {college_info.get('videos_count', 0)}, Photos: {college_info.get('photos_count', 0)}")
-    print(f"✓ Q&A: {college_info.get('qa_count', 'N/A')}")
-    print(f"✓ Ranking Highlights: {len(ranking_data['highlights']['rankings'])} items")
-    print(f"✓ NIRF Data: {len(ranking_data['nirf']['table_data'])} tables, {len(ranking_data['nirf']['comparison'])} comparisons")
-    print(f"✓ Outlook Data: {len(ranking_data['outlook']['table_data'])} tables, {len(ranking_data['outlook']['comparison'])} comparisons")
-    print(f"✓ Business Today: {len(ranking_data['business_today']['table_data'])} tables, {len(ranking_data['business_today']['comparison'])} comparisons")
-    print(f"✓ QS World: {len(ranking_data['qs_world']['rankings'])} categories, {len(ranking_data['qs_world']['comparison'])} comparisons")
-    print(f"✓ International QS: {len(ranking_data['international_ranking']['qs_ranking'])} categories")
-    print(f"✓ International FT: {len(ranking_data['international_ranking']['financial_times_ranking'])} categories")
-    print(f"✓ TOC Items: {len(ranking_data['table_of_contents'])}")
-    
+ 
     return college_info
 
 
@@ -10416,42 +9745,41 @@ def scrape_mini_clips(driver, URLS):
         }
     }
     
-    # ---------- WAIT FOR PAGE TO FULLY LOAD ----------
-    print("Waiting for page to fully load...")
+
     time.sleep(5)
     
     try:
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-        print("✓ Page loaded successfully")
+       
     except:
-        print("⚠️ Page loading timeout")
+        pass
     
     # ---------- COLLEGE HEADER ----------
-    print("\nExtracting college header information...")
+
     try:
         # Extract cover image
         try:
             cover_img = wait.until(EC.presence_of_element_located((By.ID, "topHeaderCard-gallery-image")))
             college_info["cover_image"] = cover_img.get_attribute("src")
-            print(f"✓ Cover image found")
+            
         except:
-            print("⚠️ Cover image not found")
+            pass
         
         # Extract logo
         try:
             logo_img = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".ca46d2.e014b3 img")))
             college_info["logo"] = logo_img.get_attribute("src")
-            print(f"✓ Logo found")
+           
         except:
-            print("⚠️ Logo not found")
+            pass
         
         # Extract college name
         try:
             college_name_elem = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "h1.cc5e8d")))
             college_info["college_name"] = college_name_elem.text.strip()
-            print(f"✓ College name: {college_info['college_name']}")
+         
         except:
-            print("⚠️ College name not found")
+            pass
         
         # Extract location
         try:
@@ -10461,9 +9789,9 @@ def scrape_mini_clips(driver, URLS):
                 parts = [p.strip() for p in location_text.split(",", 1)]
                 college_info["location"] = parts[0].replace(",", "").strip()
                 college_info["city"] = parts[1] if len(parts) > 1 else ""
-            print(f"✓ Location: {college_info['location']}, {college_info['city']}")
+           
         except:
-            print("⚠️ Location not found")
+            pass
         
         # Extract rating and reviews
         try:
@@ -10478,9 +9806,9 @@ def scrape_mini_clips(driver, URLS):
             if reviews_match:
                 college_info["reviews_count"] = int(reviews_match.group(1))
             
-            print(f"✓ Rating: {college_info['rating']}, Reviews: {college_info['reviews_count']}")
+
         except:
-            print("⚠️ Rating/Reviews not found")
+            pass
         
         # Extract other details
         try:
@@ -10494,13 +9822,12 @@ def scrape_mini_clips(driver, URLS):
                     if year_match:
                         college_info["established_year"] = year_match.group(1)
             
-            print(f"✓ Institute type: {college_info['institute_type']}")
-            print(f"✓ Established year: {college_info['established_year']}")
+           
         except:
-            print("⚠️ Institute details not found")
+            pass
             
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print(" Error in college header section: ")
     
     # ---------- GALLERY DATA SCRAPING ----------
     print("\n" + "="*50)
@@ -10560,7 +9887,7 @@ def scrape_mini_clips(driver, URLS):
             print("⚠️ TOC not found")
             
     except Exception as e:
-        print(f"⚠️ Error extracting TOC: {e}")
+        print(" Error extracting TOC: ")
     
     # 2. EXTRACT CAMPUS & INFRASTRUCTURE IMAGES
     print("\n2. Extracting Campus & Infrastructure Images...")
@@ -10626,7 +9953,7 @@ def scrape_mini_clips(driver, URLS):
             print(f"✓ Found {len(campus_data['videos'])} campus videos")
             
     except Exception as e:
-        print(f"⚠️ Error extracting campus infrastructure: {e}")
+        print(" Error extracting campus infrastructure: ")
     
     # 3. EXTRACT MINI CLIPS
     print("\n3. Extracting Mini Clips...")
@@ -10704,7 +10031,7 @@ def scrape_mini_clips(driver, URLS):
             print(f"✓ Found {len(mini_clips_data)} mini clips")
             
     except Exception as e:
-        print(f"⚠️ Error extracting mini clips: {e}")
+        print(" Error extracting mini clips: ")
     
     # 4. EXTRACT ALL GALLERY SECTIONS DYNAMICALLY
     print("\n4. Extracting All Gallery Sections...")
@@ -10811,7 +10138,7 @@ def scrape_mini_clips(driver, URLS):
             print(f"✓ Processed {len(gallery_sections)} gallery sections")
             
     except Exception as e:
-        print(f"⚠️ Error extracting all gallery sections: {e}")
+        print(" Error extracting all gallery sections: ")
     
     # 5. EXTRACT ADDITIONAL MEDIA FROM ALL SECTIONS
     print("\n5. Extracting Additional Media from All Sections...")
@@ -10896,39 +10223,17 @@ def scrape_mini_clips(driver, URLS):
             college_info["videos_count"] = len(all_media.get("videos", [])) + len(all_media.get("youtube_links", []))
             college_info["photos_count"] = len(all_media.get("images", []))
             
-            print(f"✓ Found {len(all_media.get('images', []))} total images on page")
-            print(f"✓ Found {len(all_media.get('videos', []))} video thumbnails")
-            print(f"✓ Found {len(all_media.get('youtube_links', []))} YouTube iframes")
+
             
     except Exception as e:
-        print(f"⚠️ Error extracting additional media: {e}")
-    
-    # FINAL SUMMARY
-    print("\n" + "="*50)
-    print("GALLERY DATA EXTRACTION COMPLETE - SUMMARY")
-    print("="*50)
-    print(f"✓ College: {college_info.get('college_name', 'N/A')}")
-    print(f"✓ Rating: {college_info.get('rating', 'N/A')} ({college_info.get('reviews_count', 'N/A')} reviews)")
-    print(f"✓ Videos: {college_info.get('videos_count', 0)}, Photos: {college_info.get('photos_count', 0)}")
-    print(f"✓ Table of Contents: {len(college_info['gallery_data']['table_of_contents'])} items")
-    print(f"✓ Campus Images: {len(college_info['gallery_data']['campus_infrastructure']['images'])}")
-    print(f"✓ Campus Videos: {len(college_info['gallery_data']['campus_infrastructure']['videos'])}")
-    print(f"✓ Mini Clips: {len(college_info['gallery_data']['mini_clips'])}")
-    print(f"✓ Total Gallery Media Items: {sum(len(section.get('images', [])) + len(section.get('videos', [])) for section in [
-        college_info['gallery_data']['campus_infrastructure'],
-        college_info['gallery_data']['lab_library_academic'],
-        college_info['gallery_data']['hostel_sports']
-    ])}")
+        print("Error extracting additional media")
     
     
     return college_info
 
 
 def scrape_hostel_campus_js(driver, URLS):
-    """
-    Scrapes campus & hostel info from JS-loaded pages (like Shiksha).
-    Returns structured JSON.
-    """
+
     driver.get(URLS["infrastructure"])
     wait = WebDriverWait(driver, 25)
     time.sleep(5)  # allow JS to load
@@ -11076,7 +10381,7 @@ def scrape_hostel_campus_js(driver, URLS):
         print(f"Found {len(reviews_data)} reviews")
         
     except Exception as e:
-        print(f"Error scraping reviews: {e}")
+        print(f"Error scraping reviews: ")
         college_info["reviews"] = []
     
     # ================= 2. SCRAPE INFRASTRUCTURE SECTION FROM HTML =================
@@ -11214,7 +10519,7 @@ def scrape_hostel_campus_js(driver, URLS):
             print(f"Infrastructure section scraped: {len(infrastructure_data)} items")
     
     except Exception as e:
-        print(f"Error scraping infrastructure section: {e}")
+        print(f"Error scraping infrastructure section: ")
     
     # ================= 3. USE JS TO SCRAPE OTHER CONTENT =================
     js_result = driver.execute_script("""
@@ -11723,7 +11028,7 @@ def scrape_hostel_campus_js(driver, URLS):
                     college_info['campus_content']['sports']['images'].append(img_url)
             
         except Exception as e:
-            print(f"Fallback parsing error: {e}")
+            print(f"Fallback parsing error: ")
     
     # ================= 6. ENHANCE WITH INFRASTRUCTURE SECTION DATA =================
     # If infrastructure section has better data, use it to enhance existing data
@@ -11777,7 +11082,7 @@ def parse_faculty_full_html(driver,URLS):
             college_info["cover_image"] = cover_img.get_attribute("src")
             print(f"✓ Cover image found: {college_info['cover_image']}")
         except Exception as e:
-            print(f"⚠️ Cover image not found: {e}")
+            print(" Cover image not found: ")
         
         # Extract college name
         try:
@@ -11788,7 +11093,7 @@ def parse_faculty_full_html(driver,URLS):
             college_info["college_name"] = college_name
             print(f"✓ College name found: {college_info['college_name']}")
         except Exception as e:
-            print(f"⚠️ College name not found: {e}")
+            print(" College name not found: ")
         
         # Extract location and city
         try:
@@ -11810,7 +11115,7 @@ def parse_faculty_full_html(driver,URLS):
             
             print(f"✓ Location found: {college_info['location']}, {college_info['city']}")
         except Exception as e:
-            print(f"⚠️ Location not found: {e}")
+            print(" Location not found: ")
         
         # Extract rating
         try:
@@ -11822,7 +11127,7 @@ def parse_faculty_full_html(driver,URLS):
                 college_info["rating"] = rating_match.group(1)
                 print(f"✓ Rating found: {college_info['rating']}")
         except Exception as e:
-            print(f"⚠️ Rating not found: {e}")
+            print(" Rating not found: ")
         
         # Extract reviews count
         try:
@@ -11834,7 +11139,7 @@ def parse_faculty_full_html(driver,URLS):
                 college_info["reviews_count"] = int(reviews_match.group(1))
                 print(f"✓ Reviews count found: {college_info['reviews_count']}")
         except Exception as e:
-            print(f"⚠️ Reviews count not found: {e}")
+            print(" Reviews count not found: ")
         
         # Extract Q&A count
         try:
@@ -11849,7 +11154,7 @@ def parse_faculty_full_html(driver,URLS):
                 college_info["qa_count"] = int(count)
                 print(f"✓ Q&A count found: {college_info['qa_count']}")
         except Exception as e:
-            print(f"⚠️ Q&A count not found: {e}")
+            print(" Q&A count not found: ")
         
         # Extract institute type (if available)
         try:
@@ -11862,7 +11167,7 @@ def parse_faculty_full_html(driver,URLS):
                     print(f"✓ Institute type found: {college_info['institute_type']}")
                     break
         except Exception as e:
-            print(f"⚠️ Institute type not found: {e}")
+            print(" Institute type not found: ")
         
         # Extract established year (if available)
         try:
@@ -11877,7 +11182,7 @@ def parse_faculty_full_html(driver,URLS):
                     print(f"✓ Established year found: {college_info['established_year']}")
                     break
         except Exception as e:
-            print(f"⚠️ Established year not found: {e}")
+            print(" Established year not found: ")
         
         # Extract videos and photos count (from different parts of page)
         try:
@@ -11892,7 +11197,7 @@ def parse_faculty_full_html(driver,URLS):
                         print(f"✓ Videos count found: {college_info['videos_count']}")
                         break
         except Exception as e:
-            print(f"⚠️ Videos count not found: {e}")
+            print(" Videos count not found: ")
         
         try:
             # Look for photos count
@@ -11906,7 +11211,7 @@ def parse_faculty_full_html(driver,URLS):
                         print(f"✓ Photos count found: {college_info['photos_count']}")
                         break
         except Exception as e:
-            print(f"⚠️ Photos count not found: {e}")
+            print(" Photos count not found: ")
         
         # Extract logo (if available)
         try:
@@ -11920,10 +11225,10 @@ def parse_faculty_full_html(driver,URLS):
                     print(f"✓ Logo found: {college_info['logo']}")
                     break
         except Exception as e:
-            print(f"⚠️ Logo not found: {e}")
+            print(" Logo not found: ")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print(" Error in college header section: ")
     driver.get(URLS["faculty"])
     wait = WebDriverWait(driver, 15)
 
@@ -12169,7 +11474,7 @@ def parse_articles_section(driver,URLS):
             college_info["cover_image"] = cover_img.get_attribute("src")
             print(f"✓ Cover image found: {college_info['cover_image']}")
         except Exception as e:
-            print(f"⚠️ Cover image not found: {e}")
+            print(" Cover image not found: ")
         
         # Extract college name
         try:
@@ -12180,7 +11485,7 @@ def parse_articles_section(driver,URLS):
             college_info["college_name"] = college_name
             print(f"✓ College name found: {college_info['college_name']}")
         except Exception as e:
-            print(f"⚠️ College name not found: {e}")
+            print(" College name not found: ")
         
         # Extract location and city
         try:
@@ -12202,7 +11507,7 @@ def parse_articles_section(driver,URLS):
             
             print(f"✓ Location found: {college_info['location']}, {college_info['city']}")
         except Exception as e:
-            print(f"⚠️ Location not found: {e}")
+            print(" Location not found: ")
         
         # Extract rating
         try:
@@ -12214,7 +11519,7 @@ def parse_articles_section(driver,URLS):
                 college_info["rating"] = rating_match.group(1)
                 print(f"✓ Rating found: {college_info['rating']}")
         except Exception as e:
-            print(f"⚠️ Rating not found: {e}")
+            print(" Rating not found: ")
         
         # Extract reviews count
         try:
@@ -12226,7 +11531,7 @@ def parse_articles_section(driver,URLS):
                 college_info["reviews_count"] = int(reviews_match.group(1))
                 print(f"✓ Reviews count found: {college_info['reviews_count']}")
         except Exception as e:
-            print(f"⚠️ Reviews count not found: {e}")
+            print(" Reviews count not found: ")
         
         # Extract Q&A count
         try:
@@ -12241,7 +11546,7 @@ def parse_articles_section(driver,URLS):
                 college_info["qa_count"] = int(count)
                 print(f"✓ Q&A count found: {college_info['qa_count']}")
         except Exception as e:
-            print(f"⚠️ Q&A count not found: {e}")
+            print(" Q&A count not found: ")
         
         # Extract institute type (if available)
         try:
@@ -12254,7 +11559,7 @@ def parse_articles_section(driver,URLS):
                     print(f"✓ Institute type found: {college_info['institute_type']}")
                     break
         except Exception as e:
-            print(f"⚠️ Institute type not found: {e}")
+            print(" Institute type not found: ")
         
         # Extract established year (if available)
         try:
@@ -12269,7 +11574,7 @@ def parse_articles_section(driver,URLS):
                     print(f"✓ Established year found: {college_info['established_year']}")
                     break
         except Exception as e:
-            print(f"⚠️ Established year not found: {e}")
+            print(" Established year not found: ")
         
         # Extract videos and photos count (from different parts of page)
         try:
@@ -12284,7 +11589,7 @@ def parse_articles_section(driver,URLS):
                         print(f"✓ Videos count found: {college_info['videos_count']}")
                         break
         except Exception as e:
-            print(f"⚠️ Videos count not found: {e}")
+            print(" Videos count not found: ")
         
         try:
             # Look for photos count
@@ -12298,7 +11603,7 @@ def parse_articles_section(driver,URLS):
                         print(f"✓ Photos count found: {college_info['photos_count']}")
                         break
         except Exception as e:
-            print(f"⚠️ Photos count not found: {e}")
+            print(" Photos count not found: ")
         
         # Extract logo (if available)
         try:
@@ -12312,10 +11617,10 @@ def parse_articles_section(driver,URLS):
                     print(f"✓ Logo found: {college_info['logo']}")
                     break
         except Exception as e:
-            print(f"⚠️ Logo not found: {e}")
+            print(" Logo not found: ")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print(" Error in college header section: ")
     driver.get(URLS["compare"])
     wait = WebDriverWait(driver, 15)
 
@@ -12399,7 +11704,7 @@ def parse_faq_scholarships_section(driver, URLS):
             college_info["cover_image"] = cover_img.get_attribute("src")
             print(f"✓ Cover image found: {college_info['cover_image']}")
         except Exception as e:
-            print(f"⚠️ Cover image not found: {e}")
+            print(" Cover image not found: ")
         
         # Extract college name
         try:
@@ -12410,7 +11715,7 @@ def parse_faq_scholarships_section(driver, URLS):
             college_info["college_name"] = college_name
             print(f"✓ College name found: {college_info['college_name']}")
         except Exception as e:
-            print(f"⚠️ College name not found: {e}")
+            print(" College name not found: ")
         
         # Extract location and city
         try:
@@ -12432,7 +11737,7 @@ def parse_faq_scholarships_section(driver, URLS):
             
             print(f"✓ Location found: {college_info['location']}, {college_info['city']}")
         except Exception as e:
-            print(f"⚠️ Location not found: {e}")
+            print(" Location not found: ")
         
         # Extract rating
         try:
@@ -12444,7 +11749,7 @@ def parse_faq_scholarships_section(driver, URLS):
                 college_info["rating"] = rating_match.group(1)
                 print(f"✓ Rating found: {college_info['rating']}")
         except Exception as e:
-            print(f"⚠️ Rating not found: {e}")
+            print(" Rating not found: ")
         
         # Extract reviews count
         try:
@@ -12456,7 +11761,7 @@ def parse_faq_scholarships_section(driver, URLS):
                 college_info["reviews_count"] = int(reviews_match.group(1))
                 print(f"✓ Reviews count found: {college_info['reviews_count']}")
         except Exception as e:
-            print(f"⚠️ Reviews count not found: {e}")
+            print(" Reviews count not found: ")
         
         # Extract Q&A count
         try:
@@ -12471,7 +11776,7 @@ def parse_faq_scholarships_section(driver, URLS):
                 college_info["qa_count"] = int(count)
                 print(f"✓ Q&A count found: {college_info['qa_count']}")
         except Exception as e:
-            print(f"⚠️ Q&A count not found: {e}")
+            print(" Q&A count not found: ")
         
         # Extract institute type (if available)
         try:
@@ -12484,7 +11789,7 @@ def parse_faq_scholarships_section(driver, URLS):
                     print(f"✓ Institute type found: {college_info['institute_type']}")
                     break
         except Exception as e:
-            print(f"⚠️ Institute type not found: {e}")
+            print(" Institute type not found: ")
         
         # Extract established year (if available)
         try:
@@ -12499,7 +11804,7 @@ def parse_faq_scholarships_section(driver, URLS):
                     print(f"✓ Established year found: {college_info['established_year']}")
                     break
         except Exception as e:
-            print(f"⚠️ Established year not found: {e}")
+            print(" Established year not found: ")
         
         # Extract videos and photos count (from different parts of page)
         try:
@@ -12514,7 +11819,7 @@ def parse_faq_scholarships_section(driver, URLS):
                         print(f"✓ Videos count found: {college_info['videos_count']}")
                         break
         except Exception as e:
-            print(f"⚠️ Videos count not found: {e}")
+            print(" Videos count not found: ")
         
         try:
             # Look for photos count
@@ -12528,7 +11833,7 @@ def parse_faq_scholarships_section(driver, URLS):
                         print(f"✓ Photos count found: {college_info['photos_count']}")
                         break
         except Exception as e:
-            print(f"⚠️ Photos count not found: {e}")
+            print(" Photos count not found: ")
         
         # Extract logo (if available)
         try:
@@ -12542,10 +11847,10 @@ def parse_faq_scholarships_section(driver, URLS):
                     print(f"✓ Logo found: {college_info['logo']}")
                     break
         except Exception as e:
-            print(f"⚠️ Logo not found: {e}")
+            print(" Logo not found: ")
 
     except Exception as e:
-        print(f"⚠️ Error in college header section: {e}")
+        print(" Error in college header section: ")
     driver.get(URLS["scholarships"])
     wait = WebDriverWait(driver, 15)
     # section = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".wikkiContents.faqAccordian")))
@@ -12556,7 +11861,7 @@ def parse_faq_scholarships_section(driver, URLS):
             )
         )
     except:
-        print("⚠️ parse_faq_scholarships_section not available, skipping")
+        
         return None
     driver.execute_script("arguments[0].scrollIntoView({block:'center'});", section)
     time.sleep(0.5)
@@ -12612,85 +11917,85 @@ def parse_faq_scholarships_section(driver, URLS):
 
     return {"college_info":college_info,"result":result}
 
-def extract_shiksha_qna(driver,URLS):
-    driver.get(URLS["qna"])
+# def extract_shiksha_qna(driver,URLS):
+#     driver.get(URLS["qna"])
 
-    # Thoda wait karo page load ke liye
-    import time
-    time.sleep(2)
+#     # Thoda wait karo page load ke liye
+#     import time
+#     time.sleep(2)
 
-    soup = BeautifulSoup(driver.page_source, "html.parser")
-    result = {}
+#     soup = BeautifulSoup(driver.page_source, "html.parser")
+#     result = {}
 
-    # ===== Question Details =====
-    question_data = {}
-    title_tag = soup.select_one("#quesTitle_5114413 .wikkiContents")
-    question_data['title'] = title_tag.get_text(strip=True) if title_tag else None
+#     # ===== Question Details =====
+#     question_data = {}
+#     title_tag = soup.select_one("#quesTitle_5114413 .wikkiContents")
+#     question_data['title'] = title_tag.get_text(strip=True) if title_tag else None
 
-    asker_tag = soup.select_one(".new-column .right-cl a")
-    question_data['asked_by'] = asker_tag.get_text(strip=True) if asker_tag else None
-    question_data['asker_profile'] = asker_tag['href'] if asker_tag else None
+#     asker_tag = soup.select_one(".new-column .right-cl a")
+#     question_data['asked_by'] = asker_tag.get_text(strip=True) if asker_tag else None
+#     question_data['asker_profile'] = asker_tag['href'] if asker_tag else None
 
-    follower_tag = soup.select_one(".followersCountTextArea")
-    question_data['followers'] = int(follower_tag.get_text(strip=True).split()[0]) if follower_tag else 0
+#     follower_tag = soup.select_one(".followersCountTextArea")
+#     question_data['followers'] = int(follower_tag.get_text(strip=True).split()[0]) if follower_tag else 0
 
-    # Views
-    viewers_tag = soup.select_one(".viewers-span")
-    if viewers_tag:
-        views_text = viewers_tag.get_text(strip=True).replace("Views","").strip()
-        if "k" in views_text:
-            views_text = views_text.replace("k", "")
-            question_data['views'] = int(float(views_text) * 1000)
-        else:
-            question_data['views'] = int(views_text)
-    else:
-        question_data['views'] = 0
+#     # Views
+#     viewers_tag = soup.select_one(".viewers-span")
+#     if viewers_tag:
+#         views_text = viewers_tag.get_text(strip=True).replace("Views","").strip()
+#         if "k" in views_text:
+#             views_text = views_text.replace("k", "")
+#             question_data['views'] = int(float(views_text) * 1000)
+#         else:
+#             question_data['views'] = int(views_text)
+#     else:
+#         question_data['views'] = 0
 
 
-    time_tag = soup.select_one("span.time span:last-child")
-    question_data['posted'] = time_tag.get_text(strip=True) if time_tag else None
+#     time_tag = soup.select_one("span.time span:last-child")
+#     question_data['posted'] = time_tag.get_text(strip=True) if time_tag else None
 
-    result['question'] = question_data
+#     result['question'] = question_data
 
-    # ===== Answers =====
-    answers = []
-    for li in soup.find_all("li", class_="module"):
-        answer = {}
+#     # ===== Answers =====
+#     answers = []
+#     for li in soup.find_all("li", class_="module"):
+#         answer = {}
 
-        author_tag = li.select_one(".avatar-name")
-        answer['author_name'] = author_tag.get_text(strip=True) if author_tag else None
-        answer['author_profile'] = author_tag['href'] if author_tag else None
+#         author_tag = li.select_one(".avatar-name")
+#         answer['author_name'] = author_tag.get_text(strip=True) if author_tag else None
+#         answer['author_profile'] = author_tag['href'] if author_tag else None
 
-        level_tag = li.select_one(".lvl-name")
-        answer['contributor_level'] = level_tag.get_text(strip=True) if level_tag else None
+#         level_tag = li.select_one(".lvl-name")
+#         answer['contributor_level'] = level_tag.get_text(strip=True) if level_tag else None
 
-        time_tag = li.select_one(".time")
-        answer['time'] = time_tag.get_text(strip=True) if time_tag else None
+#         time_tag = li.select_one(".time")
+#         answer['time'] = time_tag.get_text(strip=True) if time_tag else None
 
-        content_tag = li.select_one("p[id^='answerMsgTxt_']")
-        if content_tag:
-            text = content_tag.get_text(strip=True)
-            text = text.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
-            answer['content'] = text
-        else:
-            answer['content'] = None
+#         content_tag = li.select_one("p[id^='answerMsgTxt_']")
+#         if content_tag:
+#             text = content_tag.get_text(strip=True)
+#             text = text.replace("&lt;", "<").replace("&gt;", ">").replace("&amp;", "&")
+#             answer['content'] = text
+#         else:
+#             answer['content'] = None
 
-        upvote_tag = li.select_one("input[id^='userCountUpvote_']")
-        downvote_tag = li.select_one("input[id^='userCountDownvote_']")
-        answer['upvotes'] = int(upvote_tag['value']) if upvote_tag else 0
-        answer['downvotes'] = int(downvote_tag['value']) if downvote_tag else 0
+#         upvote_tag = li.select_one("input[id^='userCountUpvote_']")
+#         downvote_tag = li.select_one("input[id^='userCountDownvote_']")
+#         answer['upvotes'] = int(upvote_tag['value']) if upvote_tag else 0
+#         answer['downvotes'] = int(downvote_tag['value']) if downvote_tag else 0
 
-        share_tag = li.select_one("a.qSLayer")
-        answer['share_url'] = share_tag['data-shareurl'] if share_tag else None
+#         share_tag = li.select_one("a.qSLayer")
+#         answer['share_url'] = share_tag['data-shareurl'] if share_tag else None
 
-        report_tag = li.select_one("a.raLayerClk")
-        answer['report_url'] = report_tag['href'] if report_tag else None
+#         report_tag = li.select_one("a.raLayerClk")
+#         answer['report_url'] = report_tag['href'] if report_tag else None
 
-        answers.append(answer)
+#         answers.append(answer)
 
-    result['answers'] = answers
+#     result['answers'] = answers
 
-    return result
+#     return result
 
 
 def scrape_mba_colleges():
