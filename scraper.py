@@ -95,26 +95,7 @@ BASE_URL = [
     "https://www.shiksha.com/college/imt-nagpur-institute-of-management-technology-2942",
     "https://www.shiksha.com/university/university-of-lucknow-21456",
     "https://www.shiksha.com/university/vidyasagar-university-midnapore-4217",
-    "https://www.shiksha.com/college/sharda-school-of-business-studies-greater-noida-28552",
-    "https://www.shiksha.com/college/jaipuria-indore-jaipuria-institute-of-management-32476",
-    "https://www.shiksha.com/university/opju-op-jindal-university-raigarh-chhattisgarh-other-47013",
-    "https://www.shiksha.com/university/vignan-s-foundation-for-science-technology-and-research-guntur-21507",
-    "https://www.shiksha.com/university/gjust-guru-jambheshwar-university-of-science-and-technology-hisar-3273",
-    "https://www.shiksha.com/college/national-academy-of-agricultural-research-management-rajendra-nagar-hyderabad-37509",
-    "https://www.shiksha.com/college/chandigarh-business-school-of-administration-sahibzada-ajit-singh-nagar-116853",
-    "https://www.shiksha.com/college/cms-business-school-jain-deemed-to-be-university-bangalore-gandhi-nagar-38233",
-    "https://www.shiksha.com/college/gibs-business-school-bangalore-46745",
-    "https://www.shiksha.com/college/nmims-school-of-business-management-mumbai-vile-parle-west-46487",
-    "https://www.shiksha.com/college/dayananda-sagar-business-school-banashankari-bangalore-28376",
-    "https://www.shiksha.com/college/symbiosis-institute-of-operations-management-symbiosis-international-nashik-33796",
-    "https://www.shiksha.com/college/itm-business-school-navi-mumbai-35619",
-    "https://www.shiksha.com/college/soil-institute-of-management-gurgaon-26672",
-    "https://www.shiksha.com/college/sies-college-of-management-studies-navi-mumbai-mumbai-28278",
-    "https://www.shiksha.com/college/rajagiri-centre-for-business-studies-kochi-30865",
-    "https://www.shiksha.com/college/prin-l-n-welingkar-institute-of-management-development-and-research-hosur-road-bangalore-32444",
-    "https://www.shiksha.com/college/indian-institute-of-social-welfare-and-business-management-college-square-kolkata-166",
-    "https://www.shiksha.com/college/chitkara-business-school-chitkara-university-chandigarh-28446",
-    "https://www.shiksha.com/university/shoolini-university-solan-31257",
+   
 ]
 
 
@@ -140,7 +121,7 @@ def create_driver():
     options = Options()
 
     # Mandatory for GitHub Actions
-    options.add_argument("--headless=new")
+    # options.add_argument("--headless=new")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-gpu")
@@ -153,7 +134,7 @@ def create_driver():
     )
 
     # Important for Ubuntu runner
-    options.binary_location = "/usr/bin/chromium"
+    # options.binary_location = "/usr/bin/chromium"
 
     service = Service(ChromeDriverManager().install())
 
